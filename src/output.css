@@ -572,68 +572,78 @@ video {
   position: relative;
 }
 
-.top-1\/2{
-  top: 50%;
-}
-
-.top-0{
-  top: 0px;
-}
-
-.-top-12{
-  top: -3rem;
-}
-
-.-top-4{
-  top: -1rem;
-}
-
-.-top-6{
-  top: -1.5rem;
-}
-
-.-top-5{
-  top: -1.25rem;
-}
-
-.left-auto{
-  left: auto;
+.-top-3{
+  top: -0.75rem;
 }
 
 .left-1\/2{
   left: 50%;
 }
 
-.-top-3{
-  top: -0.75rem;
+.mx-2{
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
-.m-0{
-  margin: 0px;
-}
-
-.m-auto{
-  margin: auto;
+.my-auto{
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .flex{
   display: flex;
 }
 
-.h-24{
-  height: 6rem;
+.h-28{
+  height: 7rem;
 }
 
 .h-3\/4{
   height: 75%;
 }
 
+.h-5\/6{
+  height: 83.333333%;
+}
+
 .h-screen{
   height: 100vh;
 }
 
+.h-8{
+  height: 2rem;
+}
+
+.h-full{
+  height: 100%;
+}
+
+.h-dvh{
+  height: 100dvh;
+}
+
+.h-96{
+  height: 24rem;
+}
+
 .w-full{
   width: 100%;
+}
+
+.w-8{
+  width: 2rem;
+}
+
+.w-dvw{
+  width: 100dvw;
+}
+
+.w-screen{
+  width: 100vw;
+}
+
+.w-96{
+  width: 24rem;
 }
 
 .flex-1{
@@ -673,13 +683,8 @@ video {
   border-radius: 0.75rem;
 }
 
-.border-x-2{
-  border-left-width: 2px;
-  border-right-width: 2px;
-}
-
-.border-r-2{
-  border-right-width: 2px;
+.border-2{
+  border-width: 2px;
 }
 
 .border-gray-400{
@@ -697,13 +702,29 @@ video {
   background-color: rgb(13 44 82 / var(--tw-bg-opacity, 1));
 }
 
-.p-1{
-  padding: 0.25rem;
+.bg-white{
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
-.text-2xl{
-  font-size: 1.5rem;
-  line-height: 2rem;
+.bg-battleships{
+  background-image: url('/src/assets/background_warships.jpeg');
+}
+
+.bg-cover{
+  background-size: cover;
+}
+
+.bg-contain{
+  background-size: contain;
+}
+
+.bg-auto{
+  background-size: auto;
+}
+
+.p-1{
+  padding: 0.25rem;
 }
 
 .text-3xl{
@@ -716,8 +737,37 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.text-red-500{
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
+}
+
 .shadow-2xl{
   --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-xl{
+  --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.transition{
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.ease-in-out{
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.active\:scale-75:active{
+  --tw-scale-x: .75;
+  --tw-scale-y: .75;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }

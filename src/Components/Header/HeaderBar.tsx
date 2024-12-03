@@ -2,8 +2,8 @@ import HeaderButton from "./HeaderButton";
 const HeaderBar = () => {
   return (
     <header
-      className="bg-battleship-blue h-24 shadow-2xl
-  flex flex-row"
+      className="bg-battleship-blue h-28 shadow-2xl
+  flex flex-row "
     >
       <div className="flex-[2] flex bg-battleship-blue justify-center items-center">
         <a href="https://cooltext.com">

@@ -10,6 +10,9 @@ export default {
       fontFamily: {
         oswald: ["Oswald", "sans-serif"],
       },
+      backgroundImage: {
+        battleships: "url('/src/assets/background_warships.jpeg')",
+      },
     },
   },
   plugins: [],
