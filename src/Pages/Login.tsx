@@ -4,10 +4,10 @@ const Login = () => {
   return (
     <div className="w-full h-full flex justify-center items-center ">
       <form
-        className="w-1/3 h-3/5 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-black rounded-xl
+        className="w-1/4 h-3/5 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
     margin-x-auto text-white p-2"
       >
-        <header className="flex flex-col h-1/3 w-full">
+        <header className="flex flex-col h-1/3 w-full justify-center items-center">
           <h2 className="text-center text-slate-400 italic text-xl">
             It's now or never
           </h2>
@@ -24,7 +24,7 @@ const Login = () => {
           <input
             placeholder="Username"
             type="text"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2"
+            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
           />{" "}
         </div>
         <div className="flex flex-row items-center h-1/3 w-full">
@@ -36,7 +36,7 @@ const Login = () => {
           <input
             placeholder="Password"
             type="password"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2"
+            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
           />{" "}
         </div>
         <div className="flex h-1/3 w-full justify-center items-center">
