@@ -1,11 +1,45 @@
 import padlock from "../assets/padlock(2).png";
 import user from "../assets/user.png";
+import HeaderButton from "../Components/Header/HeaderButton";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "../Utils/Authprovider";
+import FormInput from "../Components/FormInput";
 const Login = () => {
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setError("");
+
+    if (!userName || !password) {
+      setError("Username or password cant be empty!");
+      return;
+    }
+
+    const result = await login(userName, password);
+
+    if (result.success) {
+      navigate("/play");
+    } else if (result.message) {
+      setError(result.message);
+    } else {
+      setError(
+        "An error occured while logging you in. Please try again later."
+      );
+    }
+  };
+
   return (
     <div className="w-full h-full flex justify-center items-center ">
       <form
         className="w-1/4 h-3/5 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
     margin-x-auto text-white p-2"
+        onSubmit={handleSubmit}
       >
         <header className="flex flex-col h-1/3 w-full justify-center items-center">
           <h2 className="text-center text-slate-400 italic text-xl">
@@ -15,38 +49,24 @@ const Login = () => {
             Login to play, captain!
           </h1>
         </header>
-        <div className="flex flex-row items-center h-1/3 w-full">
-          {" "}
-          <img
-            src={user}
-            className="border-2 h-8 w-8 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          />
-          <input
-            placeholder="Username"
-            type="text"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
-          />{" "}
-        </div>
-        <div className="flex flex-row items-center h-1/3 w-full">
-          {" "}
-          <img
-            src={padlock}
-            className="border-2 h-8 w-8 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          />
-          <input
-            placeholder="Password"
-            type="password"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
-          />{" "}
-        </div>
+
+        <FormInput
+          imgSrc={user}
+          placeholder="Username"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          type="text"
+        />
+        <FormInput
+          imgSrc={padlock}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+        />
+
         <div className="flex h-1/3 w-full justify-center items-center">
-          <div className="flex-1 flex flex-col  h-5/6 bg-battleship-blue-light justify-end my-auto border-2 cursor-pointer rounded-xl mx-2  border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
-            <div className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative">
-              <p className="text-3xl text-white absolute -top-3 left-1/2 -translate-x-1/2">
-                Login
-              </p>
-            </div>
-          </div>
+          <HeaderButton title="Login" type="submit" />
         </div>
       </form>
     </div>

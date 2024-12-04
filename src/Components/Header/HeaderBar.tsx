@@ -16,10 +16,10 @@ const HeaderBar = () => {
           />
         </a>
       </div>
-      <HeaderButton title="Play" />
-      <HeaderButton title="Leaderboards" />
-      <HeaderButton title="Login" />
-      <HeaderButton title="Register" />
+      <HeaderButton title="Play" type="button" />
+      <HeaderButton title="Leaderboards" type="button" />
+      <HeaderButton title="Login" type="button" />
+      <HeaderButton title="Register" type="button" />
     </header>
   );
 };

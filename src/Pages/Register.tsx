@@ -1,10 +1,45 @@
 import padlock from "../assets/padlock(2).png";
 import user from "../assets/user.png";
-import email from "../assets/mail.png";
+import emailIcon from "../assets/mail.png";
+import React, { useState } from "react";
+import { useAuth } from "../Utils/Authprovider";
+import { useNavigate } from "react-router";
+import HeaderButton from "../Components/Header/HeaderButton";
+import FormInput from "../Components/FormInput";
 const Register = () => {
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setError("");
+
+    if (!userName || !password || !email) {
+      setError("Username, email or password cant be empty!");
+      return;
+    }
+
+    const result = await register(userName, email, password);
+
+    if (result.success) {
+      navigate("/play");
+    } else if (result.message) {
+      setError(result.message);
+    } else {
+      setError(
+        "An error occured while registering you in. Please try again later."
+      );
+    }
+  };
+
   return (
     <div className="w-full h-full flex justify-center items-center ">
       <form
+        onSubmit={handleSubmit}
         className="w-1/4 h-4/5 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
     margin-x-auto text-white p-2"
       >
@@ -16,50 +51,30 @@ const Register = () => {
             Register to play, captain!
           </h1>
         </header>
-        <div className="flex flex-row items-center h-1/4 w-full">
-          {" "}
-          <img
-            src={user}
-            className="border-2 h-8 w-8 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          />
-          <input
-            placeholder="Username"
-            type="text"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
-          />{" "}
-        </div>
-        <div className="flex flex-row items-center h-1/4 w-full">
-          {" "}
-          <img
-            src={email}
-            className="border-2 h-8 w-8 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          />
-          <input
-            placeholder="Email"
-            type="text"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
-          />{" "}
-        </div>
-        <div className="flex flex-row items-center h-1/4 w-full">
-          {" "}
-          <img
-            src={padlock}
-            className="border-2 h-8 w-8 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          />
-          <input
-            placeholder="Password"
-            type="password"
-            className="bg-none outline-none p-5 rounded-xl text-black h-1/2 w-4/5"
-          />{" "}
-        </div>
+        <FormInput
+          imgSrc={user}
+          placeholder="Username"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          type="text"
+        />
+        <FormInput
+          imgSrc={emailIcon}
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+        />
+        <FormInput
+          imgSrc={padlock}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+        />
+
         <div className="flex h-1/4 w-full justify-center items-center">
-          <div className="flex-1 flex flex-col  h-5/6 bg-battleship-blue-light justify-end my-auto border-2 cursor-pointer rounded-xl mx-2  border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
-            <div className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative">
-              <p className="text-3xl text-white absolute -top-3 left-1/2 -translate-x-1/2">
-                Register
-              </p>
-            </div>
-          </div>
+          <HeaderButton title="Register" type="submit" />
         </div>
       </form>
     </div>

@@ -13,6 +13,19 @@ export interface AuthContextType {
   ) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   getToken: () => string | null;
-  isAuhtenticated: boolean;
+  isAuthenticated: boolean;
   loading: boolean;
+}
+
+export interface ButtonProps {
+  type: "button" | "submit" | "reset";
+  title: string;
+}
+
+export interface FormProps {
+  imgSrc: string;
+  placeholder: string;
+  value: string;
+  type: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
