@@ -602,6 +602,10 @@ video {
   height: 33.333333%;
 }
 
+.h-1\/4{
+  height: 25%;
+}
+
 .h-28{
   height: 7rem;
 }
@@ -612,6 +616,10 @@ video {
 
 .h-3\/5{
   height: 60%;
+}
+
+.h-4\/5{
+  height: 80%;
 }
 
 .h-5\/6{
@@ -632,14 +640,6 @@ video {
 
 .h-screen{
   height: 100vh;
-}
-
-.h-4\/5{
-  height: 80%;
-}
-
-.h-1\/4{
-  height: 25%;
 }
 
 .w-1\/4{

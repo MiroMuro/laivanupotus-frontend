@@ -26,6 +26,7 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  console.log(import.meta.env.VITE_BACKEND_BASE_URL);
   return (
     <div className="h-screen w-full">
       <RouterProvider router={router} />
