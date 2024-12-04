@@ -8,6 +8,45 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.loading-dots {
+  display: flex;
+  justify-content: end;
+  align-items: end;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  margin: 4px 2px;
+  background: white;
+  border-radius: 50%;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+  opacity: 0;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

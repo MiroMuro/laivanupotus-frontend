@@ -18,8 +18,12 @@ export interface AuthContextType {
 }
 
 export interface ButtonProps {
+  loading?: boolean;
   type: "button" | "submit" | "reset";
   title: string;
+}
+export interface HeaderButtonProps extends ButtonProps {
+  to: string;
 }
 
 export interface FormProps {

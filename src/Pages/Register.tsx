@@ -4,13 +4,15 @@ import emailIcon from "../assets/mail.png";
 import React, { useState } from "react";
 import { useAuth } from "../Utils/Authprovider";
 import { useNavigate } from "react-router";
-import HeaderButton from "../Components/Header/HeaderButton";
+import SubmitButton from "../Components/SubmitButton";
 import FormInput from "../Components/FormInput";
 const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -22,9 +24,9 @@ const Register = () => {
       setError("Username, email or password cant be empty!");
       return;
     }
-
+    setIsLoading(true);
     const result = await register(userName, email, password);
-
+    setIsLoading(false);
     if (result.success) {
       navigate("/play");
     } else if (result.message) {
@@ -74,7 +76,7 @@ const Register = () => {
         />
 
         <div className="flex h-1/4 w-full justify-center items-center">
-          <HeaderButton title="Register" type="submit" />
+          <SubmitButton title="Register" type="submit" loading={isLoading} />
         </div>
       </form>
     </div>
