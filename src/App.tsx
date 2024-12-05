@@ -5,8 +5,7 @@ import Play from "./Pages/Play.tsx";
 import Login from "./Pages/Login.tsx";
 import Leaderboards from "./Pages/Leaderboards.tsx";
 import Register from "./Pages/Register.tsx";
-import axios from "axios";
-import { AuthProvider } from "./Utils/Authprovider.tsx";
+import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
 const Layout = () => (
   <BackgroundImage>
@@ -44,18 +43,36 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  console.log(import.meta.env.VITE_BACKEND_BASE_URL);
-  axios.interceptors.request.use((config) => {
-    console.log("The config url", config.url);
-    console.log("The config baseUrl,", config.baseURL);
-    return config;
-  });
+  console.log("" + import.meta.env.VITE_BACKEND_BASE_URL);
+  const { fetch: origFetch } = window;
+  const { user, token } = useAuth();
+  window.fetch = async (...args) => {
+    let [resource, options] = args;
+    console.log("Intercepted fetch call resouce: ", resource);
+    console.log("Intercepted fetch call options: ", options);
+    const authHeader = new Headers();
+    if (user && token) {
+      authHeader.append("Authorization", `Bearer ${token}`);
+    }
+
+    if (
+      !resource.toString().includes("login") ||
+      !resource.toString().includes("register")||
+    ) {
+      options = { ...options, headers: {
+        ...options.headers,
+        ...authHeader,
+      }};
+    }
+    const response = await origFetch(resource, options);
+
+    return response;
+  };
+
   return (
-    <AuthProvider>
-      <div className="h-screen w-full">
-        <RouterProvider router={router} />
-      </div>
-    </AuthProvider>
+    <div className="h-screen w-full">
+      <RouterProvider router={router} />
+    </div>
   );
 }
 
