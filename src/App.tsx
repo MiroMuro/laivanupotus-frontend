@@ -43,27 +43,55 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const isLoginOrRegisterReq = (resource: RequestInfo | URL) => {
+    if (
+      !resource.toString().includes("login") ||
+      !resource.toString().includes("register")
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const appendAuthHeaders = (
+    options: RequestInit | undefined,
+    authHeader: Headers
+  ) => {
+    if (options && options.headers) {
+      options = {
+        ...options,
+        headers: {
+          ...options.headers,
+          ...authHeader,
+        },
+      };
+    } else {
+      options = {
+        ...options,
+        headers: {
+          ...authHeader,
+        },
+      };
+    }
+
+    return options;
+  };
+
   console.log("" + import.meta.env.VITE_BACKEND_BASE_URL);
   const { fetch: origFetch } = window;
   const { user, token } = useAuth();
   window.fetch = async (...args) => {
     let [resource, options] = args;
-    console.log("Intercepted fetch call resouce: ", resource);
-    console.log("Intercepted fetch call options: ", options);
     const authHeader = new Headers();
-    if (user && token) {
-      authHeader.append("Authorization", `Bearer ${token}`);
+    if (!isLoginOrRegisterReq(resource)) {
+      if (user && token) {
+        authHeader.append("Authorization", `Bearer ${token}`);
+        options = appendAuthHeaders(options, authHeader);
+      } else {
+        throw new Error("User not logged in");
+      }
     }
 
-    if (
-      !resource.toString().includes("login") ||
-      !resource.toString().includes("register")||
-    ) {
-      options = { ...options, headers: {
-        ...options.headers,
-        ...authHeader,
-      }};
-    }
     const response = await origFetch(resource, options);
 
     return response;
