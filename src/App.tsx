@@ -5,6 +5,7 @@ import Play from "./Pages/Play.tsx";
 import Login from "./Pages/Login.tsx";
 import Leaderboards from "./Pages/Leaderboards.tsx";
 import Register from "./Pages/Register.tsx";
+import NotFound from "./Pages/NotFound.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
 const Layout = () => (
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       },
       { path: "Login", element: <Login /> },
       { path: "Register", element: <Register /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ]);
@@ -83,6 +85,7 @@ function App() {
   window.fetch = async (...args) => {
     let [resource, options] = args;
     const authHeader = new Headers();
+    // Only try add headers to routes that aren't login or register.
     if (!isLoginOrRegisterReq(resource)) {
       if (user && token) {
         authHeader.append("Authorization", `Bearer ${token}`);
