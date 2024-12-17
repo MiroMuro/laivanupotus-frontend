@@ -40,42 +40,38 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-center ">
-      <form
-        className="w-1/4 h-2/3 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
+    <form
+      className="w-1/4 h-2/3 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
     margin-x-auto text-white p-2"
-        onSubmit={handleSubmit}
-      >
-        <header className="flex flex-col h-1/3 w-full justify-center items-center">
-          <h2 className="text-center text-slate-400 italic text-xl">
-            It's now or never
-          </h2>
-          <h1 className="text-center  text-inherit text-3xl">
-            Login to play, captain!
-          </h1>
-          <div>{error}</div>
-        </header>
+      onSubmit={handleSubmit}
+    >
+      <header className="flex flex-col h-1/3 w-full justify-center items-center">
+        <h2 className="text-center text-slate-400 italic text-xl">
+          It's now or never
+        </h2>
+        <h1 className="text-center text-3xl">Login to play, captain!</h1>
+        <div>{error}</div>
+      </header>
 
-        <FormInput
-          imgSrc={user}
-          placeholder="Username"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          type="text"
-        />
-        <FormInput
-          imgSrc={padlock}
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          type="password"
-        />
+      <FormInput
+        imgSrc={user}
+        placeholder="Username"
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+        type="text"
+      />
+      <FormInput
+        imgSrc={padlock}
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        type="password"
+      />
 
-        <div className="flex h-1/3 w-full justify-center items-center">
-          <SubmitButton title="Login" type="submit" loading={isLoading} />
-        </div>
-      </form>
-    </div>
+      <div className="flex h-1/3 w-full justify-center items-center">
+        <SubmitButton title="Login" type="submit" loading={isLoading} />
+      </div>
+    </form>
   );
 };
 export default Login;
