@@ -107,19 +107,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Error registering user. Check your credentials");
       }
 
-      let authHeaders = response.headers.get("Authorization");
-      const authToken = authHeaders?.slice(7);
-
-      if (authToken) {
-        localStorage.setItem("token", authToken);
-      } else {
-        throw new Error("invalid token");
-      }
-
-      const decodeUser = jwtDecode(authToken);
-      setUser(decodeUser);
-      setToken(authToken);
-
       return { success: true };
     } catch (error: unknown) {
       if (

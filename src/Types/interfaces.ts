@@ -33,3 +33,8 @@ export interface FormProps {
   type: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
+export type FormHeaderProps = {
+  message?: string;
+  status?: "error" | "success" | "nada";
+};

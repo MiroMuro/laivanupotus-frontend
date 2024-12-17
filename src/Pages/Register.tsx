@@ -6,11 +6,15 @@ import { useAuth } from "../Utils/Authprovider";
 import { useNavigate } from "react-router";
 import SubmitButton from "../Components/SubmitButton";
 import FormInput from "../Components/FormInput";
+import FormHeader from "../Components/FormHeader";
+import { FormHeaderProps } from "../Types/interfaces";
+
 const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"error" | "success" | "nada">("nada");
   const [isLoading, setIsLoading] = useState(false);
 
   const { register } = useAuth();
@@ -18,50 +22,55 @@ const Register = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setError("");
+    setMessage("");
 
     if (!userName || !password || !email) {
-      setError("Username, email or password cant be empty!");
+      setStatus("error");
+      setMessage("Username, email or password cant be empty!");
       return;
     }
     setIsLoading(true);
     const result = await register(userName, email, password);
+    console.log("The result", result);
     setIsLoading(false);
     if (result.success) {
-      navigate("/play");
-    } else if (result.message) {
-      console.log("This is the error message", result);
-      setError(result.message);
+      handleSuccessfulRegistration();
+    } else if (!result.success && result.message) {
+      handleError(result.message);
     } else {
-      setError(
+      handleError(
         "An error occured while registering you in. Please try again later."
       );
     }
   };
 
+  const handleSuccessfulRegistration = () => {
+    let timeLeft = 5;
+    setStatus("success");
+    const timer = setInterval(() => {
+      if (timeLeft === 0) {
+        clearInterval(timer);
+        navigate("/login");
+      } else {
+        setMessage(
+          `Registration successful! Redirecting to login in ${timeLeft} seconds...`
+        );
+        timeLeft--;
+      }
+    }, 1000);
+  };
+
+  const handleError = (message: string) => {
+    setStatus("error");
+    setMessage(message);
+  };
   return (
     <form
       onSubmit={handleSubmit}
       className="w-1/4 h-4/5 flex flex-col justify-evenly bg-battleship-blue-light border-4 border-gray-400 rounded-xl
     margin-x-auto text-white p-2"
     >
-      <header className="flex flex-col h-1/3 w-full justify-center items-center">
-        <h2 className="text-center text-slate-400 italic text-xl">
-          It's now or never
-        </h2>
-        <h1 className="text-center  text-inherit text-3xl">
-          Register to play, captain!
-        </h1>
-        <h1
-          className={`my-2 p-2 min-h-11 ${
-            error
-              ? "animate-error-message-fade  text-center text-white border-2 border-gray-400 rounded-md bg-red-500"
-              : ""
-          }`}
-        >
-          {error}
-        </h1>
-      </header>
+      <FormHeader message={message} status={status} />
       <FormInput
         imgSrc={user}
         placeholder="Username"

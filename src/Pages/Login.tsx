@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../Utils/Authprovider";
 import FormInput from "../Components/FormInput";
+import FormHeader from "../Components/FormHeader";
+
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -45,21 +47,7 @@ const Login = () => {
     margin-x-auto text-white p-2"
       onSubmit={handleSubmit}
     >
-      <header className="flex flex-col h-1/3 w-full justify-center items-center">
-        <h2 className="text-center text-slate-400 italic text-xl">
-          It's now or never
-        </h2>
-        <h1 className="text-center text-3xl">Login to play, captain!</h1>
-        <h1
-          className={`my-2 p-2 min-h-11 ${
-            error
-              ? "animate-error-message-fade  text-center text-white border-2 border-gray-400 rounded-md bg-red-500"
-              : ""
-          }`}
-        >
-          {error}
-        </h1>
-      </header>
+      <FormHeader error={error} />
 
       <FormInput
         imgSrc={user}
