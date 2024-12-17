@@ -10,9 +10,9 @@ const NotFound = () => {
         </p>
         <button
           className="bg-battleship-blue-dark text-white p-2 rounded-xl border-2 border-gray-500 my-4 transition transformation ease-in-out 200ms active:scale-75 hover:scale-105"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
         >
-          Go back
+          Home
         </button>
       </div>
     </div>
