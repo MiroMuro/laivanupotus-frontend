@@ -30,6 +30,7 @@ const Register = () => {
     if (result.success) {
       navigate("/play");
     } else if (result.message) {
+      console.log("This is the error message", result);
       setError(result.message);
     } else {
       setError(
@@ -50,6 +51,15 @@ const Register = () => {
         </h2>
         <h1 className="text-center  text-inherit text-3xl">
           Register to play, captain!
+        </h1>
+        <h1
+          className={`my-2 p-2 min-h-11 ${
+            error
+              ? "animate-error-message-fade  text-center text-white border-2 border-gray-400 rounded-md bg-red-500"
+              : ""
+          }`}
+        >
+          {error}
         </h1>
       </header>
       <FormInput

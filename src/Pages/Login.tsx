@@ -1,7 +1,7 @@
 import padlock from "../assets/padlock(2).png";
 import user from "../assets/user.png";
 import SubmitButton from "../Components/SubmitButton";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../Utils/Authprovider";
 import FormInput from "../Components/FormInput";
@@ -50,7 +50,15 @@ const Login = () => {
           It's now or never
         </h2>
         <h1 className="text-center text-3xl">Login to play, captain!</h1>
-        <div>{error}</div>
+        <h1
+          className={`my-2 p-2 min-h-11 ${
+            error
+              ? "animate-error-message-fade  text-center text-white border-2 border-gray-400 rounded-md bg-red-500"
+              : ""
+          }`}
+        >
+          {error}
+        </h1>
       </header>
 
       <FormInput

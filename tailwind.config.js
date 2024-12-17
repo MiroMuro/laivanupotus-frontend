@@ -1,3 +1,5 @@
+import { transform } from "typescript";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.tsx"],
@@ -15,7 +17,18 @@ export default {
       backgroundImage: {
         battleships: "url('/src/assets/background_warships.jpeg')",
       },
+      keyframes: {
+        fadeInAndOut: {
+          "0%": { opacity: "0" },
+          "10%": { opacity: "1" },
+          "90%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
+      },
+      animation: {
+        "error-message-fade": "fadeInAndOut 10s linear forwards",
+      },
     },
+    plugins: [],
   },
-  plugins: [],
 };

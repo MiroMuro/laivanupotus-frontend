@@ -102,6 +102,7 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
+      console.log("response", response);
       if (!response.ok) {
         throw new Error("Error registering user. Check your credentials");
       }
