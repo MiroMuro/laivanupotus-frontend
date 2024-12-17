@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import { useAuth } from "./Authprovider";
 import NotAuthenticated from "../Pages/NotAuthenticated";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
