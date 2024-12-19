@@ -1,5 +1,8 @@
 import HeaderButton from "./HeaderButton";
+import { useAuth } from "../../Utils/Authprovider";
 const HeaderBar = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <header
       className="bg-battleship-blue h-28 shadow-2xl
@@ -18,8 +21,19 @@ const HeaderBar = () => {
       </div>
       <HeaderButton title="Play" type="button" to="play" />
       <HeaderButton title="Leaderboards" type="button" to="leaderboards" />
-      <HeaderButton title="Login" type="button" to="login" />
-      <HeaderButton title="Register" type="button" to="register" />
+
+      {!isAuthenticated && (
+        <>
+          <HeaderButton title="Login" type="button" to="login" />
+          <HeaderButton title="Register" type="button" to="register" />
+        </>
+      )}
+      {isAuthenticated && (
+        <>
+          <HeaderButton title="Logout" type="button" to="logout" />
+          <HeaderButton title="Profile" type="button" to="profile" />
+        </>
+      )}
     </header>
   );
 };

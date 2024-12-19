@@ -10,7 +10,8 @@ import FormHeader from "../Components/FormHeader";
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"error" | "success" | "nada">("nada");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
@@ -18,27 +19,34 @@ const Login = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setError("");
-    console.log("IN THE HANDLE SUBMIT");
+    setMessage("");
     if (!userName || !password) {
-      setError("Username or password cant be empty!");
+      handleError("Username or password cant be empty!");
       return;
     }
     setIsLoading(true);
     const result = await login(userName, password);
     setIsLoading(false);
     if (result.success) {
-      navigate("/play");
-    } else if (result.message) {
-      setError(result.message);
+      handleSuccessfulLogin();
+    } else if (!result.success && result.message) {
+      handleError(result.message);
     } else {
-      setError(
+      handleError(
         "An error occured while logging you in. Please try again later."
       );
     }
+  };
 
-    console.log("The result", result);
-    console.log("THe error", error);
+  const handleError = (message: string) => {
+    setStatus("error");
+    setMessage(message);
+  };
+
+  const handleSuccessfulLogin = () => {
+    setStatus("success");
+    setMessage("Login successful! Redirecting to play page...");
+    navigate("/play");
   };
 
   return (
@@ -47,7 +55,7 @@ const Login = () => {
     margin-x-auto text-white p-2"
       onSubmit={handleSubmit}
     >
-      <FormHeader error={error} />
+      <FormHeader message={message} status={status} />
 
       <FormInput
         imgSrc={user}

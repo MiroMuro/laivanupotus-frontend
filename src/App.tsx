@@ -7,6 +7,8 @@ import Leaderboards from "./Pages/Leaderboards.tsx";
 import Register from "./Pages/Register.tsx";
 import NotFound from "./Pages/NotFound.tsx";
 import Home from "./Pages/Home.tsx";
+import Profile from "./Pages/Profile.tsx";
+import Logout from "./Pages/Logout.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
 const Layout = () => (
@@ -42,7 +44,9 @@ const router = createBrowserRouter([
         ),
       },
       { path: "Login", element: <Login /> },
+      { path: "Logout", element: <Logout /> },
       { path: "Register", element: <Register /> },
+      { path: "Profile", element: <Profile /> },
       { path: "*", element: <NotFound /> },
     ],
   },

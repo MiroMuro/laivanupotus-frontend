@@ -1,13 +1,12 @@
 import padlock from "../assets/padlock(2).png";
 import user from "../assets/user.png";
 import emailIcon from "../assets/mail.png";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../Utils/Authprovider";
 import { useNavigate } from "react-router";
 import SubmitButton from "../Components/SubmitButton";
 import FormInput from "../Components/FormInput";
 import FormHeader from "../Components/FormHeader";
-import { FormHeaderProps } from "../Types/interfaces";
 
 const Register = () => {
   const [userName, setUserName] = useState("");
@@ -25,8 +24,7 @@ const Register = () => {
     setMessage("");
 
     if (!userName || !password || !email) {
-      setStatus("error");
-      setMessage("Username, email or password cant be empty!");
+      handleError("Username, email or password cant be empty!");
       return;
     }
     setIsLoading(true);

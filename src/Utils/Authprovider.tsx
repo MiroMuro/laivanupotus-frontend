@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid credentials");
       }
 
+      console.log("response", response);
       let authHeaders = response.headers.get("Authorization");
       const auhtToken = authHeaders?.slice(7);
 
