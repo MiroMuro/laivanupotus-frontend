@@ -4,7 +4,6 @@ import { matchPath } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 const HeaderButton = (props: HeaderButtonProps) => {
   const location = useLocation();
-  console.log("location", location);
   const isUrlPathActive = !!matchPath(location.pathname, `/${props.to}`);
 
   return (

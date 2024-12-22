@@ -1,7 +1,7 @@
 import HeaderBar from "./Components/Header/HeaderBar.tsx";
 import BackgroundImage from "./Components/BackgroundImage.tsx";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import Play from "./Pages/Play.tsx";
+import PlayHome from "./Pages/Play/PlayHome.tsx";
 import Login from "./Pages/Login.tsx";
 import Leaderboards from "./Pages/Leaderboards.tsx";
 import Register from "./Pages/Register.tsx";
@@ -9,6 +9,9 @@ import NotFound from "./Pages/NotFound.tsx";
 import Home from "./Pages/Home.tsx";
 import Profile from "./Pages/Profile.tsx";
 import Logout from "./Pages/Logout.tsx";
+import CreateGame from "./Pages/Play/CreateGame.tsx";
+import JoinGame from "./Pages/Play/JoinGame.tsx";
+import QuickPlay from "./Pages/Play/QuickPlay.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
 const Layout = () => (
@@ -30,9 +33,15 @@ const router = createBrowserRouter([
         path: "play",
         element: (
           <ProtectedRoute>
-            <Play />{" "}
+            <Outlet />
           </ProtectedRoute>
         ),
+        children: [
+          { path: "", element: <PlayHome /> },
+          { path: "create", element: <CreateGame /> },
+          { path: "join", element: <JoinGame /> },
+          { path: "quick", element: <QuickPlay /> },
+        ],
       },
       {
         path: "Leaderboards",

@@ -1,26 +1,26 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { AuthContextType } from "../Types/interfaces";
-
+import { OwnUserProfile } from "../Types/interfaces";
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState<JwtPayload | null>(null);
+  const [user, setUser] = useState<OwnUserProfile | null>(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [decodedUser, setDecodedUser] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   //Check token validity on initial load
   useEffect(() => {
     if (token) {
+      const decodedUser = jwtDecode(token);
+      setDecodedUser(jwtDecode(token));
       try {
-        const decodedUser = jwtDecode(token);
-
         if (
-          decodedUser.exp != undefined &&
-          decodedUser.exp * 1000 > Date.now()
+          decodedUser == null ||
+          decodedUser.exp == null ||
+          decodedUser.exp * 1000 < Date.now()
         ) {
-          setUser(decodedUser);
-        } else {
           logout();
         }
       } catch (error) {
@@ -47,18 +47,18 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid credentials");
       }
 
-      console.log("response", response);
+      const userInfoJson = await response.json();
+      setUser(userInfoJson);
+
       let authHeaders = response.headers.get("Authorization");
       const auhtToken = authHeaders?.slice(7);
-
       if (auhtToken) {
         localStorage.setItem("token", auhtToken);
       } else {
         throw new Error("Invalid token");
       }
-
-      const decodeUser = jwtDecode(auhtToken);
-      setUser(decodeUser);
+      const decodedUser = jwtDecode(auhtToken);
+      setDecodedUser(decodedUser);
       setToken(auhtToken);
 
       return { success: true };
@@ -132,6 +132,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    setDecodedUser(null);
     setToken(null);
   };
 
@@ -139,12 +140,13 @@ export const AuthProvider = ({ children }) => {
 
   const contextValue = {
     user,
+    decodedUser,
     token,
     login,
     register,
     logout,
     getToken,
-    isAuthenticated: !!user,
+    isAuthenticated: !!decodedUser,
     loading,
   };
 

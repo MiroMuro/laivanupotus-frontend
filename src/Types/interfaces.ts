@@ -1,7 +1,8 @@
 import { JwtPayload } from "jwt-decode";
 export interface AuthContextType {
-  user: JwtPayload | null;
+  user: OwnUserProfile | null;
   token: string | null;
+  decodedUser: JwtPayload | null;
   login: (
     userName: string,
     password: string
@@ -38,3 +39,13 @@ export type FormHeaderProps = {
   message?: string;
   status?: "error" | "success" | "nada";
 };
+
+export interface OwnUserProfile {
+  id: number;
+  userName: string;
+  email: string;
+  totalGames: number;
+  gamesWon: number;
+  gamesLost: number;
+  createdAt: Date;
+}
