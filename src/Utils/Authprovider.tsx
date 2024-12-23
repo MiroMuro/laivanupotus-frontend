@@ -5,7 +5,9 @@ import { OwnUserProfile } from "../Types/interfaces";
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState<OwnUserProfile | null>(null);
+  const [currentUserInformation, setCurrentUserInformation] = useState<
+    OwnUserProfile | undefined
+  >();
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [decodedUser, setDecodedUser] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -15,15 +17,18 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       const decodedUser = jwtDecode(token);
       setDecodedUser(jwtDecode(token));
+      console.log("HERE", currentUserInformation);
       try {
         if (
           decodedUser == null ||
           decodedUser.exp == null ||
           decodedUser.exp * 1000 < Date.now()
         ) {
+          console.log("Token expired");
           logout();
         }
       } catch (error) {
+        console.error("Error decoding token", error);
         logout();
       }
     }
@@ -47,19 +52,22 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid credentials");
       }
 
-      const userInfoJson = await response.json();
-      setUser(userInfoJson);
+      const currentUserInformationJson = await response.json();
+      console.log(currentUserInformationJson);
+      setCurrentUserInformation(currentUserInformationJson);
 
       let authHeaders = response.headers.get("Authorization");
-      const auhtToken = authHeaders?.slice(7);
-      if (auhtToken) {
-        localStorage.setItem("token", auhtToken);
+      const authToken = authHeaders?.slice(7);
+
+      if (authToken) {
+        localStorage.setItem("token", authToken);
       } else {
         throw new Error("Invalid token");
       }
-      const decodedUser = jwtDecode(auhtToken);
+
+      const decodedUser = jwtDecode(authToken);
       setDecodedUser(decodedUser);
-      setToken(auhtToken);
+      setToken(authToken);
 
       return { success: true };
     } catch (error: unknown) {
@@ -103,7 +111,6 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      console.log("response", response);
       if (!response.ok) {
         throw new Error("Error registering user. Check your credentials");
       }
@@ -131,7 +138,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    setUser(null);
+    setCurrentUserInformation(undefined);
     setDecodedUser(null);
     setToken(null);
   };
@@ -139,7 +146,7 @@ export const AuthProvider = ({ children }) => {
   const getToken = () => token;
 
   const contextValue = {
-    user,
+    currentUserInformation,
     decodedUser,
     token,
     login,

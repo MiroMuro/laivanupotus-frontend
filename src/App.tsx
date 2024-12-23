@@ -52,10 +52,25 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "Profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
       { path: "Login", element: <Login /> },
-      { path: "Logout", element: <Logout /> },
+      {
+        path: "Logout",
+        element: (
+          <ProtectedRoute>
+            <Logout />
+          </ProtectedRoute>
+        ),
+      },
       { path: "Register", element: <Register /> },
-      { path: "Profile", element: <Profile /> },
+
       { path: "*", element: <NotFound /> },
     ],
   },

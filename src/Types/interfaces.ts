@@ -1,6 +1,6 @@
 import { JwtPayload } from "jwt-decode";
 export interface AuthContextType {
-  user: OwnUserProfile | null;
+  currentUserInformation: OwnUserProfile | null;
   token: string | null;
   decodedUser: JwtPayload | null;
   login: (
