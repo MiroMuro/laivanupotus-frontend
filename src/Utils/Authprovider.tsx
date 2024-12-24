@@ -2,8 +2,8 @@ import { createContext, useState, useContext, useEffect } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { AuthContextType } from "../Types/interfaces";
 import { OwnUserProfile } from "../Types/interfaces";
+import useCookie from "./useCookie";
 export const AuthContext = createContext<AuthContextType | null>(null);
-
 export const AuthProvider = ({ children }) => {
   const [currentUserInformation, setCurrentUserInformation] = useState<
     OwnUserProfile | undefined
@@ -11,10 +11,16 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [decodedUser, setDecodedUser] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setCookie, getCookie, clearCookie } = useCookie();
 
   //Check token validity on initial load
   useEffect(() => {
     if (token) {
+      const userInfo = getCookie("currentUserInformation");
+      if (userInfo) {
+        setCurrentUserInformation(userInfo);
+      }
+
       const decodedUser = jwtDecode(token);
       setDecodedUser(jwtDecode(token));
       console.log("HERE", currentUserInformation);
@@ -53,6 +59,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const currentUserInformationJson = await response.json();
+      setCookie("currentUserInformation", currentUserInformationJson);
       console.log(currentUserInformationJson);
       setCurrentUserInformation(currentUserInformationJson);
 
@@ -138,6 +145,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    clearCookie("currentUserInformation");
     setCurrentUserInformation(undefined);
     setDecodedUser(null);
     setToken(null);
