@@ -13,33 +13,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { setCookie, getCookie, clearCookie } = useCookie();
 
+  const isTokenExpired = (decodedToken: JwtPayload) => {
+    return (
+      decodedToken == null ||
+      decodedToken.exp == null ||
+      decodedToken.exp * 1000 < Date.now()
+    );
+  };
+
   //Check token validity on initial load
   useEffect(() => {
     if (token) {
-      const userInfo = getCookie("currentUserInformation");
-      if (userInfo) {
-        setCurrentUserInformation(userInfo);
-      }
-
-      const decodedUser = jwtDecode(token);
-      setDecodedUser(jwtDecode(token));
-      console.log("HERE", currentUserInformation);
       try {
-        if (
-          decodedUser == null ||
-          decodedUser.exp == null ||
-          decodedUser.exp * 1000 < Date.now()
-        ) {
-          console.log("Token expired");
-          logout();
+        //Get user info from cookie on possible page reload.
+        const userInfo = getCookie("currentUserInformation");
+        if (userInfo) {
+          setCurrentUserInformation(userInfo);
         }
+
+        const decodedToken = jwtDecode(token);
+        //Token expired. Logout
+        if (isTokenExpired(decodedToken)) {
+          logout();
+          return;
+        }
+
+        setDecodedUser(decodedToken);
       } catch (error) {
-        console.error("Error decoding token", error);
+        console.error("Error initializing auth:", error);
         logout();
       }
     }
     setLoading(false);
   }, []);
+
+  const extractAuthToken = (headers: Headers) => {
+    let authHeaders = headers.get("Authorization");
+    const authToken = authHeaders?.slice(7);
+    if (!authToken) throw new Error("Invalid auth token!");
+    return authToken;
+  };
 
   const login = async (userName: string, password: string) => {
     try {
@@ -58,19 +71,14 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid credentials");
       }
 
+      //User information handling
       const currentUserInformationJson = await response.json();
       setCookie("currentUserInformation", currentUserInformationJson);
-      console.log(currentUserInformationJson);
       setCurrentUserInformation(currentUserInformationJson);
 
-      let authHeaders = response.headers.get("Authorization");
-      const authToken = authHeaders?.slice(7);
-
-      if (authToken) {
-        localStorage.setItem("token", authToken);
-      } else {
-        throw new Error("Invalid token");
-      }
+      //Handle token
+      const authToken = extractAuthToken(response.headers);
+      localStorage.setItem("token", authToken);
 
       const decodedUser = jwtDecode(authToken);
       setDecodedUser(decodedUser);

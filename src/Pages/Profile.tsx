@@ -1,6 +1,4 @@
 import { useAuth } from "../Utils/Authprovider";
-import userProfile from "../Images/userProfile.png";
-import { useState } from "react";
 import user from "../assets/user.png";
 import mail from "../assets/mail.png";
 import calendar from "../assets/calendar.png";
@@ -11,8 +9,7 @@ const Profile = () => {
   if (!currentUserInformation) {
     return <div>Loading...</div>;
   }
-  console.log(currentUserInformation);
-  console.log(currentUserInformation?.createdAt);
+
   let currentDate = new Date();
   let accountCreationDate = new Date(currentUserInformation!.createdAt);
   let differenceInAccountCreation =
@@ -24,7 +21,6 @@ const Profile = () => {
   let gamesLost = currentUserInformation?.gamesLost;
   let totalGames = currentUserInformation?.totalGames;
   let winRate = (gamesWon! / totalGames!) * 100;
-  console.log(differenceInAccountCreation / 1000 / 60 / 60 / 24);
 
   return (
     <div className="h-3/4 w-1/4 border-4 border-gray-400 bg-battleship-blue-light text-white rounded-xl flex flex-col justify-start items-center">
@@ -112,8 +108,8 @@ const Profile = () => {
           alt="https://www.flaticon.com/free-icons/logout Logout icons created by Pixel perfect"
           title="logout icons"
         />
-        <div className="flex flex-row justify-evenly w-full h-full p-">
-          <div className="flex-1 flex flex-col h-full  bg-battleship-blue-light justify-end my-auto border-2 rounded-xl ml-2  border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
+        <div className="flex flex-row justify-evenly w-full h-full py-2">
+          <div className="flex-1 flex flex-col h-full  bg-battleship-blue-light justify-end my-auto border-2 rounded-xl   border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
             <button className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative text-3xl">
               Change password
             </button>
