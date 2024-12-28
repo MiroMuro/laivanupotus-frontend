@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 const useGame = () => {
   const { token } = useAuth();
   const [games, setGames] = useState([]);
-  const { user } = useAuth();
-  console.log("The user is", user);
+
   const fetchGames = async () => {
     try {
       const response = await fetch(
@@ -18,11 +17,14 @@ const useGame = () => {
       );
 
       console.log("response", response);
+      let games = await response.json();
+      console.log("games", games);
+      setGames(games);
     } catch (error) {
       console.error(error);
     }
   };
 
-  return { games, fetchGames, setGames };
+  return { games, fetchGames };
 };
 export default useGame;

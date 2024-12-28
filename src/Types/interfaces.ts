@@ -49,3 +49,8 @@ export interface OwnUserProfile {
   gamesLost: number;
   createdAt: Date;
 }
+
+export type EditProfileDialogProps = {
+  openModal: boolean;
+  closeModal: () => void;
+};

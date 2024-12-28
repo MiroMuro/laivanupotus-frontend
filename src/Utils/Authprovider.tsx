@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [decodedUser, setDecodedUser] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
+
   const { setCookie, getCookie, clearCookie } = useCookie();
 
   const isTokenExpired = (decodedToken: JwtPayload) => {
