@@ -40,14 +40,20 @@ export type FormHeaderProps = {
   status?: "error" | "success" | "nada";
 };
 
-export interface OwnUserProfile {
+export interface UserProfile {
   id: number;
   userName: string;
-  email: string;
   totalGames: number;
   gamesWon: number;
   gamesLost: number;
+}
+
+export interface OwnUserProfile extends UserProfile {
+  email: string;
   createdAt: Date;
+}
+export interface NotOwnUserProfile extends UserProfile {
+  lastLogin: Date;
 }
 
 export type EditProfileDialogProps = {

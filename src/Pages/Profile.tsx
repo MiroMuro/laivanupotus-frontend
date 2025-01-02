@@ -121,7 +121,7 @@ const Profile = () => {
       </div>
 
       <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
-        <img
+        {/*<img
           src={padlock}
           className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
           alt="https://www.flaticon.com/free-icons/logout Logout icons created by Pixel perfect"
@@ -136,9 +136,14 @@ const Profile = () => {
               Change password
             </button>
           </div>
-        </div>
+        </div>*/}
       </div>
-      <EditProfileDialog openModal={modal} closeModal={() => setModal(false)} />
+      {modal && (
+        <EditProfileDialog
+          openModal={modal}
+          closeModal={() => setModal(false)}
+        />
+      )}
     </div>
   );
 };
