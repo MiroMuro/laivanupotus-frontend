@@ -3,7 +3,6 @@ import { useState } from "react";
 import user from "../assets/user.png";
 import mail from "../assets/mail.png";
 import calendar from "../assets/calendar.png";
-import padlock from "../assets/padlock(2).png";
 import chart from "../assets/chart.png";
 import EditProfileDialog from "../Components/EditProfileDialog";
 const Profile = () => {

@@ -60,3 +60,34 @@ export type EditProfileDialogProps = {
   openModal: boolean;
   closeModal: () => void;
 };
+
+export type GameStatus =
+  | "WAITING_FOR_PLAYER"
+  | "PLACING_SHIPS"
+  | "IN_PROGRESS"
+  | "FINISHED";
+
+export interface IngameUserProfileDto {
+  id: number;
+  userName: string;
+}
+
+export interface CurrentGame {
+  currentTurnPlayerId: null | number;
+  endedAt: null | Date;
+  id: number;
+  player1: IngameUserProfileDto;
+  player1Board: string;
+  player2: null;
+  player2Board: null;
+  startTime: Date;
+  status: GameStatus;
+  updatedAt: Date;
+}
+
+export interface GameDto {
+  id: number;
+  player1UserName: string;
+  player2UserName: null | string;
+  status: GameStatus;
+}

@@ -1,9 +1,14 @@
 import useGame from "../../Utils/useGame";
 import { useAuth } from "../../Utils/Authprovider";
-
 import { useEffect } from "react";
 const JoinGame = () => {
-  const { games, fetchGames } = useGame();
+  const { games, fetchGames, joinGame } = useGame();
+  const { currentUserInformation } = useAuth();
+  const playerId = currentUserInformation?.id;
+  const userName = currentUserInformation?.userName;
+  if (!playerId || !userName) {
+    return <div>Error loading user data, please logout and login again.</div>;
+  }
   useEffect(() => {
     fetchGames();
   }, []);
@@ -13,12 +18,28 @@ const JoinGame = () => {
         Available games
       </h1>
       {!games.length && <p>No games available</p>}
-      {games.map((game) => (
-        <div>
-          <p>game</p>
-          <button>Join</button>
-        </div>
-      ))}
+      {games.length > 0 && (
+        <table className="w-full">
+          <tr className="border-b-4 border-gray-400 bg-battleship-blue-dark">
+            <th>Game Id</th>
+            <th>Host username</th>
+            <th></th>
+          </tr>
+          {games
+            .filter((game) => game.player1UserName !== userName)
+            .map((game) => (
+              <tr className="odd:bg-battleship-blue">
+                <td className="text-center">{game.id}</td>
+                <td className="text-center">{game.player1UserName}</td>
+                <td>
+                  <button onClick={() => joinGame(game.id, playerId)}>
+                    Join Game
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </table>
+      )}
     </div>
   );
 };

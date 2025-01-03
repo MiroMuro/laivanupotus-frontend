@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { NotOwnUserProfile } from "../Types/interfaces";
 import useGame from "../Utils/useGame";
 const Leaderboards = () => {
-  const { fethUsersForLeaderboard, leaderboardUsers } = useGame();
+  const { fethUsersForLeaderboard, leaderboardUsers, setLeaderboardUsers } =
+    useGame();
   useEffect(() => {
     fethUsersForLeaderboard();
   }, []);
@@ -21,19 +22,32 @@ const Leaderboards = () => {
         <table className="w-full">
           {" "}
           <tr className="w-full text-xl bg-battleship-blue-dark border-b-4 border-gray-400">
-            <th>Username</th>
-            <th>Wins</th>
-            <th>Losses</th>
-            <th>Winrate</th>
+            <th>
+              Username <button>⇅</button>
+            </th>
+            <th>
+              Wins <button>⇅</button>
+            </th>
+            <th>
+              Losses <button>⇅</button>
+            </th>
+            <th>
+              Winrate <button>⇅</button>
+            </th>
             <th>Last online</th>
           </tr>
           {leaderboardUsers.map((user: NotOwnUserProfile) => (
-            <tr>
+            <tr className="w-full text-xl odd:bg-battleship-blue">
               <th>{user.userName}</th>
               <th>{user.gamesWon}</th>
               <th>{user.gamesLost}</th>
               <th>
-                {Math.floor(user.gamesWon / (user.gamesLost + user.gamesWon))}%
+                {isNaN(user.gamesWon / (user.gamesLost + user.gamesWon))
+                  ? 0
+                  : Math.floor(
+                      user.gamesWon / (user.gamesLost + user.gamesWon)
+                    )}
+                %
               </th>
               <th>
                 {user.lastLogin
