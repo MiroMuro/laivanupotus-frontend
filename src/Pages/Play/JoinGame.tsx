@@ -1,9 +1,12 @@
 import useGame from "../../Utils/useGame";
 import { useAuth } from "../../Utils/Authprovider";
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 const JoinGame = () => {
-  const { games, fetchGames, joinGame } = useGame();
+  const { games, fetchGames, joinGame, currentGame, joiningGameLoading } =
+    useGame();
   const { currentUserInformation } = useAuth();
+  const navigate = useNavigate();
   const playerId = currentUserInformation?.id;
   const userName = currentUserInformation?.userName;
   if (!playerId || !userName) {
@@ -12,6 +15,13 @@ const JoinGame = () => {
   useEffect(() => {
     fetchGames();
   }, []);
+
+  useEffect(() => {
+    if (currentGame && currentGame.status === "PLACING_SHIPS") {
+      navigate("/play/game/" + currentGame.id);
+    }
+  }, [currentGame?.status, navigate]);
+
   return (
     <div className="h-3/4 w-1/4 bg-battleship-blue-light text-white rounded-xl flex flex-col justify-start items-center border-4 border-gray-400">
       <h1 className="text-3xl border-b-4 border-gray-400 text-center w-full py-4">

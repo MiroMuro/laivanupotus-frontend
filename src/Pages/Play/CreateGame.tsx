@@ -1,11 +1,12 @@
 import { useAuth } from "../../Utils/Authprovider";
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 import useGame from "../../Utils/useGame";
 const CreateGame = () => {
   const { createGame, currentGame, creatingGameLoading } = useGame();
   const { currentUserInformation } = useAuth();
   const playerId = currentUserInformation?.id;
-
+  const navigate = useNavigate();
   if (!playerId) {
     return <div>Couldn't fetch player Id, please login and try again.</div>;
   }
@@ -13,6 +14,12 @@ const CreateGame = () => {
   const handleCreateGame = () => {
     createGame(playerId);
   };
+
+  useEffect(() => {
+    if (currentGame && currentGame.status === "PLACING_SHIPS") {
+      navigate(`/play/game/${currentGame.id}`);
+    }
+  }, [currentGame?.status, navigate]);
 
   console.log("CurrentGame", currentGame);
   return (

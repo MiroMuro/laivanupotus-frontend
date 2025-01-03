@@ -770,6 +770,10 @@ video {
   width: 100%;
 }
 
+.w-3\/4{
+  width: 75%;
+}
+
 .flex-1{
   flex: 1 1 0%;
 }

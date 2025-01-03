@@ -7,6 +7,7 @@ const useGame = () => {
   const [games, setGames] = useState<GameDto[]>([]);
   const [currentGame, setCurrentGame] = useState<CurrentGame>();
   const [creatingGameLoading, setCreatingGameLoading] = useState(false);
+  const [joiningGameLoading, setJoiningGameLoading] = useState(false);
   const [leaderboardUsers, setLeaderboardUsers] = useState<NotOwnUserProfile[]>(
     []
   );
@@ -72,6 +73,7 @@ const useGame = () => {
   };
 
   const joinGame = async (matchId: number, playerId: number) => {
+    setJoiningGameLoading(true);
     try {
       const response = await fetch(
         `${
@@ -84,7 +86,7 @@ const useGame = () => {
           },
         }
       );
-
+      setJoiningGameLoading(false);
       let activeGame = await response.json();
       setCurrentGame(activeGame);
     } catch (error) {
@@ -101,6 +103,7 @@ const useGame = () => {
     currentGame,
     creatingGameLoading,
     joinGame,
+    joiningGameLoading,
   };
 };
 export default useGame;

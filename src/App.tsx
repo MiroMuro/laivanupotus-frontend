@@ -12,6 +12,7 @@ import Logout from "./Pages/Logout.tsx";
 import CreateGame from "./Pages/Play/CreateGame.tsx";
 import JoinGame from "./Pages/Play/JoinGame.tsx";
 import QuickPlay from "./Pages/Play/QuickPlay.tsx";
+import GameBoard from "./Pages/GameBoard.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
 const Layout = () => (
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
           { path: "create", element: <CreateGame /> },
           { path: "join", element: <JoinGame /> },
           { path: "quick", element: <QuickPlay /> },
+          { path: "game/:gameId", element: <GameBoard /> },
         ],
       },
       {
