@@ -1,3 +1,4 @@
+import { StompSubscription } from "@stomp/stompjs";
 import { JwtPayload } from "jwt-decode";
 export interface AuthContextType {
   currentUserInformation: OwnUserProfile | null;
@@ -43,6 +44,7 @@ export type FormHeaderProps = {
 export interface UserProfile {
   id: number;
   userName: string;
+  roles: string;
   totalGames: number;
   gamesWon: number;
   gamesLost: number;
@@ -55,7 +57,10 @@ export interface OwnUserProfile extends UserProfile {
 export interface NotOwnUserProfile extends UserProfile {
   lastLogin: Date;
 }
-
+export interface IngameUserProfileDto {
+  id: number;
+  userName: string;
+}
 export type EditProfileDialogProps = {
   openModal: boolean;
   closeModal: () => void;
@@ -67,19 +72,14 @@ export type GameStatus =
   | "IN_PROGRESS"
   | "FINISHED";
 
-export interface IngameUserProfileDto {
-  id: number;
-  userName: string;
-}
-
 export interface CurrentGame {
   currentTurnPlayerId: null | number;
   endedAt: null | Date;
   id: number;
   player1: IngameUserProfileDto;
   player1Board: string;
-  player2: null;
-  player2Board: null;
+  player2: null | IngameUserProfileDto;
+  player2Board: null | string;
   startTime: Date;
   status: GameStatus;
   updatedAt: Date;
@@ -90,4 +90,27 @@ export interface GameDto {
   player1UserName: string;
   player2UserName: null | string;
   status: GameStatus;
+}
+
+export type SubscriptionType = "game" | "playerJoined" | "move";
+export type SubscriptionCallback = (data: any) => void;
+
+export interface gameSubscriptions {
+  [gameId: number]: {
+    [key in SubscriptionType]?: StompSubscription;
+  };
+}
+
+export interface WebSocketHook {
+  subscribeToGameEvent: (
+    gameId: number,
+    eventType: SubscriptionType,
+    callback: (data: any) => void
+  ) => StompSubscription | undefined;
+  connected: boolean;
+  unsubscribeFromAllGameEvents: (gameId: number) => void;
+  unsubscribeFromSingleGameEvent: (
+    gameId: number,
+    eventType: SubscriptionType
+  ) => void;
 }

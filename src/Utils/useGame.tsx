@@ -1,5 +1,5 @@
 import { useAuth } from "./Authprovider";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NotOwnUserProfile, CurrentGame } from "../Types/interfaces";
 import { GameDto } from "../Types/interfaces";
 const useGame = () => {
@@ -88,6 +88,7 @@ const useGame = () => {
       );
       setJoiningGameLoading(false);
       let activeGame = await response.json();
+      console.log("ACTIVE GAME:", activeGame);
       setCurrentGame(activeGame);
     } catch (error) {
       console.error(error);

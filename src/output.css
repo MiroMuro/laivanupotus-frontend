@@ -754,6 +754,10 @@ video {
   width: 4rem;
 }
 
+.w-3\/4{
+  width: 75%;
+}
+
 .w-4\/5{
   width: 80%;
 }
@@ -768,10 +772,6 @@ video {
 
 .w-full{
   width: 100%;
-}
-
-.w-3\/4{
-  width: 75%;
 }
 
 .flex-1{

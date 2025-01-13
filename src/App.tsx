@@ -113,11 +113,12 @@ function App() {
     return options;
   };
 
-  console.log("" + import.meta.env.VITE_BACKEND_BASE_URL);
   const { fetch: origFetch } = window;
   const { user, token } = useAuth();
+
   window.fetch = async (...args) => {
     let [resource, options] = args;
+    console.log("Options", options);
     const authHeader = new Headers();
     // Only try add headers to routes that aren't login or register.
     if (!isLoginOrRegisterReq(resource)) {

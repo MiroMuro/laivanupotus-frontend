@@ -1,12 +1,20 @@
 import { useAuth } from "../../Utils/Authprovider";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import useWebSocket from "../../Utils/useWebSocket";
 import useGame from "../../Utils/useGame";
 const CreateGame = () => {
   const { createGame, currentGame, creatingGameLoading } = useGame();
   const { currentUserInformation } = useAuth();
+  const {
+    subscribeToGameEvent,
+    connected,
+    unsubscribeFromSingleGameEvent,
+    unsubscribeFromAllGameEvents,
+  } = useWebSocket();
   const playerId = currentUserInformation?.id;
   const navigate = useNavigate();
+
   if (!playerId) {
     return <div>Couldn't fetch player Id, please login and try again.</div>;
   }
@@ -16,10 +24,32 @@ const CreateGame = () => {
   };
 
   useEffect(() => {
+    if (currentGame?.id) {
+      const playerJoinedSubscription = subscribeToGameEvent(
+        currentGame.id,
+        "playerJoined",
+        (data) => {
+          console.log("Player joined", data);
+
+          if (data.playerJoined) {
+            subscribeToGameEvent(currentGame.id, "game", (data) => {
+              console.log("Game", data);
+            });
+
+            subscribeToGameEvent(currentGame.id, "move", (data) => {
+              console.log("Move", data);
+            });
+          }
+        }
+      );
+    }
+  }, [currentGame?.id]);
+
+  /*  useEffect(() => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
       navigate(`/play/game/${currentGame.id}`);
     }
-  }, [currentGame?.status, navigate]);
+  }, [currentGame?.status, navigate]); */
 
   console.log("CurrentGame", currentGame);
   return (
