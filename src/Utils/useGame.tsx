@@ -88,7 +88,6 @@ const useGame = () => {
       );
       setJoiningGameLoading(false);
       let activeGame = await response.json();
-      console.log("ACTIVE GAME:", activeGame);
       setCurrentGame(activeGame);
     } catch (error) {
       console.error(error);
@@ -102,6 +101,7 @@ const useGame = () => {
     setLeaderboardUsers,
     createGame,
     currentGame,
+    setCurrentGame,
     creatingGameLoading,
     joinGame,
     joiningGameLoading,

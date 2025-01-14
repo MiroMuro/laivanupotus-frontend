@@ -4,7 +4,8 @@ import { useNavigate } from "react-router";
 import useWebSocket from "../../Utils/useWebSocket";
 import useGame from "../../Utils/useGame";
 const CreateGame = () => {
-  const { createGame, currentGame, creatingGameLoading } = useGame();
+  const { createGame, currentGame, setCurrentGame, creatingGameLoading } =
+    useGame();
   const { currentUserInformation } = useAuth();
   const {
     subscribeToGameEvent,
@@ -25,31 +26,37 @@ const CreateGame = () => {
 
   useEffect(() => {
     if (currentGame?.id) {
-      const playerJoinedSubscription = subscribeToGameEvent(
-        currentGame.id,
-        "playerJoined",
-        (data) => {
-          console.log("Player joined", data);
+      subscribeToGameEvent(currentGame.id, "playerJoined", (data) => {
+        console.log("Player joined", data);
 
-          if (data.playerJoined) {
-            subscribeToGameEvent(currentGame.id, "game", (data) => {
-              console.log("Game", data);
-            });
+        if (data.messageStatus === true) {
+          delete data.messageStatus;
+          delete data.message;
+          setCurrentGame(data);
 
-            subscribeToGameEvent(currentGame.id, "move", (data) => {
-              console.log("Move", data);
-            });
-          }
+          subscribeToGameEvent(currentGame.id, "game", (data) => {
+            console.log("Game", data);
+          });
+
+          subscribeToGameEvent(currentGame.id, "move", (data) => {
+            console.log("Move", data);
+          });
         }
-      );
+      });
     }
   }, [currentGame?.id]);
 
-  /*  useEffect(() => {
+  useEffect(() => {
+    navigateToPlay();
+  }, [currentGame?.status]);
+
+  const navigateToPlay = () => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
-      navigate(`/play/game/${currentGame.id}`);
+      setTimeout(() => {
+        navigate("/play/game/" + currentGame.id);
+      }, 4000);
     }
-  }, [currentGame?.status, navigate]); */
+  };
 
   console.log("CurrentGame", currentGame);
   return (
@@ -59,6 +66,19 @@ const CreateGame = () => {
       <h2>
         {!!currentGame && currentGame.status === "WAITING_FOR_PLAYER" && (
           <div>Game creation successful! Waiting for player 2...</div>
+        )}
+      </h2>
+      <h2>
+        {!!currentGame && currentGame.status === "PLACING_SHIPS" && (
+          <>
+            <h2>Opponent found! Loading the board</h2>{" "}
+            <div className="loading-dots">
+              Loading
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </>
         )}
       </h2>
     </div>

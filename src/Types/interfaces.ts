@@ -77,12 +77,40 @@ export interface CurrentGame {
   endedAt: null | Date;
   id: number;
   player1: IngameUserProfileDto;
-  player1Board: string;
+  player1Board: playerBoard;
   player2: null | IngameUserProfileDto;
-  player2Board: null | string;
+  player2Board: playerBoard;
   startTime: Date;
   status: GameStatus;
   updatedAt: Date;
+}
+
+type Coordinate = {
+  x: number;
+  y: number;
+};
+
+type Move = {
+  x: number;
+  y: number;
+  playerBehindTheMoveId: number;
+  isHit: boolean;
+};
+
+enum ShipType {
+  CARRIER = 5,
+  BATTLESHIP = 4,
+  CRUISER = 3,
+  SUBMARINE = 3,
+  DESTROYER = 2,
+  WARBOAT = 1,
+}
+interface playerBoard {
+  allShipsCoords: Coordinate[];
+  boardState: string;
+  id: number;
+  moves: Move[];
+  ships: ShipType[];
 }
 
 export interface GameDto {
@@ -114,3 +142,8 @@ export interface WebSocketHook {
     eventType: SubscriptionType
   ) => void;
 }
+
+export type playerJoinedData = {
+  message: string;
+  messageStatus: boolean;
+};

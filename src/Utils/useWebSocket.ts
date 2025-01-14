@@ -66,9 +66,8 @@ const useWebSocket = (): WebSocketHook => {
     const subscription = stompClient.current.subscribe(
       topicPaths[eventType],
       (message) => {
-        console.log("Received message", message);
-        //const data = JSON.parse(message.body);
-        callback(message);
+        const data = JSON.parse(message.body);
+        callback(data);
       }
     );
 
