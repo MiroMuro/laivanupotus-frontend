@@ -97,13 +97,19 @@ type Move = {
   isHit: boolean;
 };
 
-enum ShipType {
+export enum ShipType {
   CARRIER = 5,
   BATTLESHIP = 4,
   CRUISER = 3,
   SUBMARINE = 3,
   DESTROYER = 2,
   WARBOAT = 1,
+}
+export interface Ship {
+  type: ShipType;
+  coordinates: Coordinate[] | null;
+  direction: "horizontal" | "vertical";
+  isSunk: boolean;
 }
 interface playerBoard {
   allShipsCoords: Coordinate[];
