@@ -16,8 +16,6 @@ const Ships = ({ ships }: { ships: ShipType[] }) => {
     );
   };
 
-  console.log("Rotatable ships", rotatableShips);
-  console.log("Ships orientation", shipsOrientation);
   return (
     <div className="rounded-md w-80 border-4 h-full border-gray-400 flex flex-col">
       <button

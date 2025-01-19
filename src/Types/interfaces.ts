@@ -106,6 +106,7 @@ export enum ShipType {
   WARBOAT = 1,
 }
 export interface Ship {
+  id: string;
   type: ShipType;
   coordinates: Coordinate[] | null;
   direction: "horizontal" | "vertical";
