@@ -1,9 +1,11 @@
 import Grid from "../Components/Grid/Grid";
+import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import Ships from "../Components/Grid/Ships";
-import { closestCorners, DndContext } from "@dnd-kit/core";
+import { closestCorners, DndContext, closestCenter } from "@dnd-kit/core";
 import { Ship, ShipType } from "../Types/interfaces";
 import { useState } from "react";
 const GameBoard = () => {
+  const [placedShips, setPlacedShips] = useState<Ship[]>([]);
   const [ships, setShips] = useState<Ship[]>([
     {
       id: "ship-1x5",
@@ -26,13 +28,7 @@ const GameBoard = () => {
       direction: "vertical",
       isSunk: false,
     },
-    {
-      id: "ship-1x3",
-      type: ShipType.SUBMARINE,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
+
     {
       id: "ship-1x2",
       type: ShipType.DESTROYER,
@@ -67,8 +63,8 @@ const GameBoard = () => {
           collisionDetection={closestCorners}
         >
           <Ships ships={ships} />
-          <Grid label="Your board" />
-          <Grid label="Opponents board" />
+          <Grid label="Your board" placedShips={placedShips} />
+          <OpponentsGrid label="Opponents board" />
         </DndContext>
       </div>
       <div className="w-1/4 h-1/6  rounded-xl flex-row">

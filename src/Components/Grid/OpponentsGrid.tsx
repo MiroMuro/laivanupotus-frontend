@@ -1,10 +1,9 @@
-import Cell from "./Cell";
-import { Ship } from "../../Types/interfaces";
+import OpponentsCell from "./OpponentsCell";
+
 interface GridProps {
   label: string;
-  placedShips: Ship[];
 }
-const Grid = ({ label, placedShips }: GridProps) => {
+const OpponentsGrid = ({ label }: GridProps) => {
   const rows = Array(10).fill(null);
   const cols = Array(10).fill(null);
 
@@ -12,11 +11,11 @@ const Grid = ({ label, placedShips }: GridProps) => {
     <div>
       <label className="block text-center text-xl">{label}</label>
       <table className="border-4 relative w-auto h-auto border-gray-400 ">
-        {rows.map((_, rowIndex) => (
+        {rows.map((row, rowIndex) => (
           <tr>
-            {cols.map((_, colIndex) => {
+            {cols.map((col, colIndex) => {
               const id = `cell-${rowIndex}-${colIndex}`;
-              return <Cell id={id} placedShips={placedShips} />;
+              return <OpponentsCell id={id} />;
             })}
           </tr>
         ))}
@@ -25,4 +24,4 @@ const Grid = ({ label, placedShips }: GridProps) => {
   );
 };
 
-export default Grid;
+export default OpponentsGrid;

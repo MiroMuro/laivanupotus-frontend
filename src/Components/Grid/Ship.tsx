@@ -35,7 +35,7 @@ const Ship = ({ battleship }: ShipProps) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`bg-green-400 border-2 border-black `}
+      className={`bg-green-400 border-2 border-black z-10 `}
       style={{ ...style, height: `${height * 40}px`, width: `${width * 40}px` }}
     ></div>
   );
