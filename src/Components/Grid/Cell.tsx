@@ -1,10 +1,10 @@
 interface CellProps {
-  placedShips: Ship[];
+  placedShips: DraggableShip[];
   rowIndex: number;
   colIndex: number;
 }
 import { useDroppable } from "@dnd-kit/core";
-import { Ship } from "../../Types/interfaces";
+import { DraggableShip } from "../../Types/interfaces";
 const Cell = ({ placedShips, rowIndex, colIndex }: CellProps) => {
   let id = `cell-${rowIndex}-${colIndex}`;
   const { setNodeRef } = useDroppable({ id: id });

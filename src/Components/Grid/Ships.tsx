@@ -1,11 +1,16 @@
 import type { Ship as ShipType } from "../../Types/interfaces";
 import Ship from "./Ship";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const Ships = ({ ships }: { ships: ShipType[] }) => {
   const [shipsOrientation, setShipsOrientation] = useState<
     "horizontal" | "vertical"
   >("horizontal");
+
   const [rotatableShips, setRotatableShips] = useState<ShipType[]>(ships);
+
+  useEffect(() => {
+    setRotatableShips(ships);
+  }, [ships]);
 
   const rotateShips = () => {
     setShipsOrientation(

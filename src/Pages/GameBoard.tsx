@@ -3,10 +3,10 @@ import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
-import { Ship, ShipType } from "../Types/interfaces";
+import { Ship, ShipType, DraggableShip } from "../Types/interfaces";
 import { useState } from "react";
 const GameBoard = () => {
-  const [placedShips, setPlacedShips] = useState<Ship[]>([]);
+  const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const [ships, setShips] = useState<Ship[]>([
     {
       id: "ship-1x5",
@@ -76,12 +76,14 @@ const GameBoard = () => {
           coordinates,
         };
         setPlacedShips((prev) => [...prev, newShip]);
+        setShips((prev) => prev.filter((ship) => ship.id !== active.id));
+        console.log("The ships:", ships[4]);
+        console.log("Active id:", active.id);
         console.log("THe ship fits!");
       } else {
         console.log("The ship doesnt fit!");
       }
     }
-    return true;
   };
 
   return (

@@ -111,8 +111,11 @@ export interface Ship {
   coordinates: Coordinate[] | null;
   direction: "horizontal" | "vertical";
   isSunk: boolean;
-  height: number | undefined;
-  width: number | undefined;
+}
+
+export interface DraggableShip extends Ship {
+  height: number;
+  width: number;
 }
 interface playerBoard {
   allShipsCoords: Coordinate[];
