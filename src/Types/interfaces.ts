@@ -85,7 +85,7 @@ export interface CurrentGame {
   updatedAt: Date;
 }
 
-type Coordinate = {
+export type Coordinate = {
   x: number;
   y: number;
 };

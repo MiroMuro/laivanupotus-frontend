@@ -45,7 +45,7 @@ const GameBoard = () => {
       isSunk: false,
     },
   ]);
-  const { getOffsetCoords } = useShip();
+  const { getShipStartingCellCoords, getShipCoords } = useShip();
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     console.log("Active", active);
@@ -58,8 +58,26 @@ const GameBoard = () => {
 
     if (!draggedShip) return;
 
-    let { row, col } = getOffsetCoords(direction, over.id, height, width);
+    let { row, col } = getShipStartingCellCoords(
+      direction,
+      over.id,
+      height,
+      width
+    );
 
+    if (draggedShip) {
+      let shipCoords = getShipCoords(direction, col, row, height, width);
+
+      console.log("ShipCoords: ", shipCoords);
+      if (row + height <= 10 && col + width <= 10) {
+        // const newShip = {
+        //   ...draggedShip
+        // }
+        console.log("THe ship fits!");
+      } else {
+        console.log("The ship doesnt fit!");
+      }
+    }
     return true;
   };
 

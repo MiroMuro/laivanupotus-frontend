@@ -1,5 +1,6 @@
+import { Coordinate } from "../Types/interfaces";
 const useShip = () => {
-  const getOffsetCoords = (
+  const getOffsetStartingCoords = (
     direction: string,
     cellId: string,
     height: number,
@@ -23,7 +24,28 @@ const useShip = () => {
     return Math.max(0, col - offsetCol);
   };
 
-  return { getOffsetCoords };
+  const getShipCoords = (
+    direction: string,
+    startingCol: number,
+    startingRow: number,
+    height: number,
+    width: number
+  ): Coordinate[] => {
+    let coords = [];
+
+    if (direction === "vertical") {
+      for (let i = startingRow; i < startingRow + height; i++) {
+        coords.push({ y: i, x: startingCol });
+      }
+    } else {
+      for (let i = startingCol; i < startingCol + width; i++) {
+        coords.push({ y: startingRow, x: i });
+      }
+    }
+
+    return coords;
+  };
+  return { getOffsetStartingCoords, getShipCoords };
 };
 
 export default useShip;
