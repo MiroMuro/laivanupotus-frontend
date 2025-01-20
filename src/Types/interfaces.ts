@@ -111,6 +111,8 @@ export interface Ship {
   coordinates: Coordinate[] | null;
   direction: "horizontal" | "vertical";
   isSunk: boolean;
+  height: number | undefined;
+  width: number | undefined;
 }
 interface playerBoard {
   allShipsCoords: Coordinate[];

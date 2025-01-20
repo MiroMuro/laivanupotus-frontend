@@ -14,10 +14,13 @@ const Grid = ({ label, placedShips }: GridProps) => {
       <table className="border-4 relative w-auto h-auto border-gray-400 ">
         {rows.map((_, rowIndex) => (
           <tr>
-            {cols.map((_, colIndex) => {
-              const id = `cell-${rowIndex}-${colIndex}`;
-              return <Cell id={id} placedShips={placedShips} />;
-            })}
+            {cols.map((_, colIndex) => (
+              <Cell
+                rowIndex={rowIndex}
+                colIndex={colIndex}
+                placedShips={placedShips}
+              />
+            ))}
           </tr>
         ))}
       </table>

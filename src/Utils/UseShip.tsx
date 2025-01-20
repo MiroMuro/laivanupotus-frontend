@@ -1,6 +1,6 @@
 import { Coordinate } from "../Types/interfaces";
 const useShip = () => {
-  const getOffsetStartingCoords = (
+  const getShipStartingCellCoords = (
     direction: string,
     cellId: string,
     height: number,
@@ -45,7 +45,7 @@ const useShip = () => {
 
     return coords;
   };
-  return { getOffsetStartingCoords, getShipCoords };
+  return { getShipStartingCellCoords, getShipCoords };
 };
 
 export default useShip;

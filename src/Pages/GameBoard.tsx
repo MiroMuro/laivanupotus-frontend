@@ -66,13 +66,16 @@ const GameBoard = () => {
     );
 
     if (draggedShip) {
-      let shipCoords = getShipCoords(direction, col, row, height, width);
+      let coordinates = getShipCoords(direction, col, row, height, width);
 
-      console.log("ShipCoords: ", shipCoords);
       if (row + height <= 10 && col + width <= 10) {
-        // const newShip = {
-        //   ...draggedShip
-        // }
+        const newShip = {
+          ...draggedShip,
+          height,
+          width,
+          coordinates,
+        };
+        setPlacedShips((prev) => [...prev, newShip]);
         console.log("THe ship fits!");
       } else {
         console.log("The ship doesnt fit!");
