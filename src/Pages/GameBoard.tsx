@@ -1,7 +1,8 @@
 import Grid from "../Components/Grid/Grid";
 import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import Ships from "../Components/Grid/Ships";
-import { closestCorners, DndContext, closestCenter } from "@dnd-kit/core";
+import useShip from "../Utils/UseShip";
+import { closestCorners, DndContext } from "@dnd-kit/core";
 import { Ship, ShipType } from "../Types/interfaces";
 import { useState } from "react";
 const GameBoard = () => {
@@ -44,11 +45,21 @@ const GameBoard = () => {
       isSunk: false,
     },
   ]);
-
+  const { getOffsetCoords } = useShip();
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     console.log("Active", active);
     console.log("Over", over);
+
+    if (!over) return;
+
+    let { direction, id, height, width } = active.data.current;
+    let draggedShip = ships.find((ship) => ship.id === id);
+
+    if (!draggedShip) return;
+
+    let { row, col } = getOffsetCoords(direction, over.id, height, width);
+
     return true;
   };
 
