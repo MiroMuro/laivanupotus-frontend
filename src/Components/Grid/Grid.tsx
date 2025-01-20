@@ -1,8 +1,8 @@
 import Cell from "./Cell";
-import { Ship } from "../../Types/interfaces";
+import { DraggableShip } from "../../Types/interfaces";
 interface GridProps {
   label: string;
-  placedShips: Ship[];
+  placedShips: DraggableShip[];
 }
 const Grid = ({ label, placedShips }: GridProps) => {
   const rows = Array(10).fill(null);

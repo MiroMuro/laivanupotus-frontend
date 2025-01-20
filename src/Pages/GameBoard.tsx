@@ -77,9 +77,6 @@ const GameBoard = () => {
         };
         setPlacedShips((prev) => [...prev, newShip]);
         setShips((prev) => prev.filter((ship) => ship.id !== active.id));
-        console.log("The ships:", ships[4]);
-        console.log("Active id:", active.id);
-        console.log("THe ship fits!");
       } else {
         console.log("The ship doesnt fit!");
       }
@@ -101,9 +98,22 @@ const GameBoard = () => {
           <OpponentsGrid label="Opponents board" />
         </DndContext>
       </div>
-      <div className="w-1/4 h-1/6  rounded-xl flex-row">
-        <button className="bg-battleship-blue-dark">Reset ships</button>
-        <button className="bg-battleship-blue-dark">Confirm ships</button>
+      <div className="w-80 h-1/6  rounded-xl flex flex-row justify-start ml-14 gap-4">
+        <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
+          <button className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ">
+            <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
+              Reset ships
+            </p>
+          </button>
+        </div>
+
+        <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
+          <button className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ">
+            <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
+              Confirm ships
+            </p>
+          </button>
+        </div>
       </div>
     </div>
   );
