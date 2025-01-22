@@ -1,6 +1,10 @@
 import { useAuth } from "./Authprovider";
 import { useState } from "react";
-import { NotOwnUserProfile, CurrentGame } from "../Types/interfaces";
+import {
+  NotOwnUserProfile,
+  CurrentGame,
+  DraggableShip,
+} from "../Types/interfaces";
 import { GameDto } from "../Types/interfaces";
 const useGame = () => {
   const { token } = useAuth();
@@ -93,6 +97,30 @@ const useGame = () => {
       console.error(error);
     }
   };
+
+  const placeShips = async (
+    matchId: number,
+    playerId: number,
+    ships: DraggableShip
+  ) => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_BASE_URL
+        }/api/game/${matchId}/place-ships?userId=${playerId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(ships),
+        }
+      );
+      console.log(response.json());
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return {
     games,
     fetchGames,
@@ -105,6 +133,7 @@ const useGame = () => {
     creatingGameLoading,
     joinGame,
     joiningGameLoading,
+    placeShips,
   };
 };
 export default useGame;

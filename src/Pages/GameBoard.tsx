@@ -99,6 +99,8 @@ const GameBoard = () => {
     setShips(initialShipsState);
   };
 
+  const confirmShips = () => {};
+
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-full flex flex-row justify-center text-center">

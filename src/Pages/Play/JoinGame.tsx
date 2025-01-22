@@ -18,7 +18,7 @@ const JoinGame = () => {
 
   useEffect(() => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
-      navigate("/play/game/" + currentGame.id);
+      navigate("/play/game/" + currentGame.id + "/" + playerId);
     }
   }, [currentGame?.status, navigate]);
 

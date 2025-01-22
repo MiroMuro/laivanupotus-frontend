@@ -53,7 +53,7 @@ const CreateGame = () => {
   const navigateToPlay = () => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
       setTimeout(() => {
-        navigate("/play/game/" + currentGame.id);
+        navigate("/play/game/" + currentGame.id + "/" + playerId);
       }, 4000);
     }
   };
