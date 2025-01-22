@@ -7,7 +7,7 @@ import { Ship, ShipType, DraggableShip } from "../Types/interfaces";
 import { useState } from "react";
 const GameBoard = () => {
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
-  const [ships, setShips] = useState<Ship[]>([
+  const initialShipsState: Ship[] = [
     {
       id: "ship-1x5",
       type: ShipType.CARRIER,
@@ -44,12 +44,14 @@ const GameBoard = () => {
       direction: "vertical",
       isSunk: false,
     },
-  ]);
+  ];
+  const [ships, setShips] = useState<Ship[]>(initialShipsState);
   const {
     getShipStartingCellCoords,
     getShipCoords,
     doesShipCollideWithPlacedShips,
   } = useShip();
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
 
@@ -92,6 +94,11 @@ const GameBoard = () => {
     }
   };
 
+  const resetShips = () => {
+    setPlacedShips([]);
+    setShips(initialShipsState);
+  };
+
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-full flex flex-row justify-center text-center">
@@ -109,7 +116,10 @@ const GameBoard = () => {
       </div>
       <div className="w-80 h-1/6  rounded-xl flex flex-row justify-start ml-14 gap-4">
         <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
-          <button className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ">
+          <button
+            className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative"
+            onClick={() => resetShips()}
+          >
             <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
               Reset ships
             </p>
