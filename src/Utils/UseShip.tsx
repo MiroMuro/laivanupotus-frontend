@@ -45,7 +45,41 @@ const useShip = () => {
 
     return coords;
   };
-  return { getShipStartingCellCoords, getShipCoords };
+
+  const doesShipCollideWithPlacedShips = (
+    currentShipCoords: Coordinate[],
+    placedShipsCoords: (Coordinate[] | null)[]
+  ): boolean => {
+    let collision = false;
+
+    if (placedShipsCoords.length === 0) {
+      return collision;
+    }
+
+    placedShipsCoords.forEach((placedShipCoords) => {
+      let isCollisionFound = currentShipCoords.find((currentShipCoords) => {
+        return !!placedShipCoords?.find(
+          (placedCoord) =>
+            currentShipCoords.x === placedCoord.x &&
+            currentShipCoords.y === placedCoord.y
+        )
+          ? true
+          : false;
+      });
+
+      if (isCollisionFound) {
+        collision = true;
+        return;
+      }
+    });
+
+    return collision;
+  };
+  return {
+    getShipStartingCellCoords,
+    getShipCoords,
+    doesShipCollideWithPlacedShips,
+  };
 };
 
 export default useShip;

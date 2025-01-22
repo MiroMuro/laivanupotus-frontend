@@ -45,11 +45,13 @@ const GameBoard = () => {
       isSunk: false,
     },
   ]);
-  const { getShipStartingCellCoords, getShipCoords } = useShip();
+  const {
+    getShipStartingCellCoords,
+    getShipCoords,
+    doesShipCollideWithPlacedShips,
+  } = useShip();
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    console.log("Active", active);
-    console.log("Over", over);
 
     if (!over) return;
 
@@ -67,8 +69,15 @@ const GameBoard = () => {
 
     if (draggedShip) {
       let coordinates = getShipCoords(direction, col, row, height, width);
+      let placedShipsCoords = placedShips.map((ship) => ship.coordinates);
 
-      if (row + height <= 10 && col + width <= 10) {
+      let doesCollide = doesShipCollideWithPlacedShips(
+        coordinates,
+        placedShipsCoords
+      );
+
+      console.log("Doe this collide?: ", doesCollide);
+      if (row + height <= 10 && col + width <= 10 && !doesCollide) {
         const newShip = {
           ...draggedShip,
           height,
