@@ -86,7 +86,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         placedShipsCoords
       );
 
-      console.log("Doe this collide?: ", doesCollide);
       if (row + height <= 10 && col + width <= 10 && !doesCollide) {
         const newShip = {
           ...draggedShip,
@@ -112,6 +111,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     playerId: string,
     placedShips: DraggableShip[]
   ) => {
+    let shipsWithLongId = placedShips.map(
+      (ship) => (ship.id = ship.id.slice(-1))
+    );
     if (placedShips.length !== initialShipsState.length) return;
     placeShips(Number(matchId), Number(playerId), placedShips);
   };
