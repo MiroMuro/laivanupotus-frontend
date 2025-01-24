@@ -1,5 +1,5 @@
 import { useAuth } from "../../Utils/Authprovider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import useWebSocket from "../../Utils/useWebSocket";
 import useGame from "../../Utils/useGame";
@@ -7,6 +7,7 @@ const CreateGame = () => {
   const { createGame, currentGame, setCurrentGame, creatingGameLoading } =
     useGame();
   const { currentUserInformation } = useAuth();
+  const [infoMessage, setInfoMessage] = useState("");
   const {
     subscribeToGameEvent,
     connected,
@@ -21,6 +22,16 @@ const CreateGame = () => {
   }
 
   const handleCreateGame = () => {
+    if (
+      (currentGame && currentGame.status === "WAITING_FOR_PLAYER") ||
+      (currentGame && currentGame.status === "PLACING_SHIPS")
+    ) {
+      setInfoMessage("Match creation already in progress... please wait...");
+      setTimeout(() => {
+        setInfoMessage("");
+      }, 4000);
+      return;
+    }
     createGame(playerId);
   };
 
@@ -60,8 +71,17 @@ const CreateGame = () => {
 
   console.log("CurrentGame", currentGame);
   return (
-    <div className="h-3/4 w-1/4 border-4 border-gray-400 bg-battleship-blue-light text-white rounded-xl">
-      <button onClick={() => handleCreateGame()}>Create a game</button>
+    <div className="h-1/3 w-1/4 border-4 flex flex-col justify-center relative items-center text-2xl border-gray-400 bg-battleship-blue-light text-white rounded-xl">
+      <label className="absolute top-3 text-xl">{infoMessage}</label>
+
+      <div className=" flex flex-col h-1/2  bg-battleship-blue-light justify-end my-auto border-2 rounded-xl mx-2  border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
+        <button
+          className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative text-3xl"
+          onClick={() => handleCreateGame()}
+        >
+          Create a game
+        </button>
+      </div>
       <h1>{creatingGameLoading ? <div>Creating game...</div> : <></>}</h1>
       <h2>
         {!!currentGame && currentGame.status === "WAITING_FOR_PLAYER" && (

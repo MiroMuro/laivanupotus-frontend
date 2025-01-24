@@ -38,7 +38,11 @@ const ProtectedGameRoute = () => {
     checkAuthorization();
   }, [gameId]);
 
-  return isAuthorized ? <GameBoard /> : <NotAuthenticated />;
+  return isAuthorized ? (
+    <GameBoard gameId={gameId!} playerId={playerId!} />
+  ) : (
+    <NotAuthenticated />
+  );
 };
 
 const NotAuthenticated = () => {

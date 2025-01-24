@@ -12,7 +12,7 @@ const PlayHome = () => {
             className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative text-3xl"
             onClick={() => navigate("/play/create")}
           >
-            Create a game
+            New game
           </button>
         </div>
         <div className="flex-1 flex flex-col h-full  bg-battleship-blue-light justify-end my-auto border-2 rounded-xl mx-2  border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">

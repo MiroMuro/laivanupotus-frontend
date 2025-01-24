@@ -101,7 +101,7 @@ const useGame = () => {
   const placeShips = async (
     matchId: number,
     playerId: number,
-    ships: DraggableShip
+    ships: DraggableShip[]
   ) => {
     try {
       const response = await fetch(

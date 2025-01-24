@@ -5,7 +5,15 @@ import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import { Ship, ShipType, DraggableShip } from "../Types/interfaces";
 import { useState } from "react";
-const GameBoard = () => {
+import useGame from "../Utils/useGame";
+
+interface GameBoardProps {
+  gameId: string;
+  playerId: string;
+}
+
+const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
+  const { placeShips } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
     {
@@ -99,7 +107,14 @@ const GameBoard = () => {
     setShips(initialShipsState);
   };
 
-  const confirmShips = () => {};
+  const confirmShips = (
+    matchId: string,
+    playerId: string,
+    placedShips: DraggableShip[]
+  ) => {
+    if (placedShips.length !== initialShipsState.length) return;
+    placeShips(Number(matchId), Number(playerId), placedShips);
+  };
 
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
@@ -129,7 +144,10 @@ const GameBoard = () => {
         </div>
 
         <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
-          <button className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ">
+          <button
+            className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative"
+            onClick={() => confirmShips(playerId, gameId, placedShips)}
+          >
             <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
               Confirm ships
             </p>
