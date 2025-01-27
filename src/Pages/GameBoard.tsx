@@ -3,10 +3,9 @@ import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
-import { Ship, ShipType, DraggableShip } from "../Types/interfaces";
+import { Ship, ShipType, DraggableShip, Coordinate } from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import { useWebSocket } from "../Utils/WebSocketProvider";
-
 import useGame from "../Utils/useGame";
 
 interface GameBoardProps {
@@ -17,6 +16,11 @@ interface GameBoardProps {
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const context = useWebSocket();
 
+  const [shotsAtOpponents, setShotsAtOpponents] = useState<Coordinate[]>([]);
+  const [opponentShots, setOpponentShots] = useState<Coordinate[]>([]);
+  const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
+  const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
+  const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
   const { disconnect, subscribeToGameEvent, connected } = context;
 
   useEffect(() => {
@@ -127,23 +131,51 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     setShips(initialShipsState);
   };
 
-  const confirmShips = (
+  const confirmShips = async (
     matchId: string,
     playerId: string,
     placedShips: DraggableShip[]
   ) => {
-    // let shipsWithLongId = placedShips.map(
-    //   (ship) => (ship.id = ship.id.slice(-1))
-    // );
-    if (placedShips.length !== initialShipsState.length) return;
-    console.log("matchId", Number(matchId), "playerId", Number(playerId));
-    placeShips(Number(matchId), Number(playerId), placedShips);
+    verifyAllShipsPlaced();
+    verifyShipsNotAlreadyPlaced();
+    let shipsWithLongId: DraggableShip[] = placedShips.map((ship) => ({
+      ...ship,
+      id: ship.id.slice(-1),
+    }));
+
+    let success = await placeShips(
+      Number(matchId),
+      Number(playerId),
+      shipsWithLongId
+    );
+
+    if (success) {
+      setShipsPlaced(true);
+      setInfoMessage(
+        "Ships placed succesfully. Waiting for opponent to place ships"
+      );
+    } else {
+      setInfoMessage("Error placing ships. Try again");
+    }
   };
 
+  const verifyAllShipsPlaced = () => {
+    if (placedShips.length !== initialShipsState.length) {
+      setInfoMessage("Place all ships before confirming");
+      return;
+    }
+  };
+
+  const verifyShipsNotAlreadyPlaced = () => {
+    if (shipsPlaced) {
+      setInfoMessage("Ships already placed");
+      return;
+    }
+  };
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-full flex flex-row justify-center text-center">
-        <p className="text-xl">Place your ships!</p>
+        <p className="text-xl">{infoMessage}</p>
       </header>
       <div className="flex  flex-row justify-around align-middle">
         <DndContext
@@ -169,7 +201,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
         <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
           <button
-            className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative"
+            className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
+              shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
+            }`}
             onClick={() => confirmShips(gameId, playerId, placedShips)}
           >
             <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">

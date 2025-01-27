@@ -894,6 +894,14 @@ video {
   animation: fadeInAndOut 10s linear forwards;
 }
 
+.cursor-not-allowed{
+  cursor: not-allowed;
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
 .flex-row{
   flex-direction: row;
 }

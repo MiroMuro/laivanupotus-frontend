@@ -5,7 +5,7 @@ const OpponentsCell = ({ id }: CellProps) => {
   let regex = /^cell-[0-9]-[0-9]$/;
   if (regex.test(id)) {
     return (
-      <td id={id} className="border-2 border-black w-10 h-10 text-xs">
+      <td key={id} id={id} className="border-2 border-black w-10 h-10 text-xs">
         {id}
       </td>
     );

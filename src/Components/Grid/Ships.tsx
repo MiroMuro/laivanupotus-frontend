@@ -50,7 +50,7 @@ const Ships = ({ ships }: { ships: ShipType[] }) => {
         } `}
       >
         {rotatableShips.map((ship) => (
-          <Ship battleship={ship} />
+          <Ship key={ship.id} battleship={ship} />
         ))}
       </div>
     </div>

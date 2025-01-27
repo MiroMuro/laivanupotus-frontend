@@ -102,7 +102,7 @@ const useGame = () => {
     matchId: number,
     playerId: number,
     ships: DraggableShip[]
-  ) => {
+  ): Promise<boolean> => {
     try {
       const response = await fetch(
         `${
@@ -117,9 +117,11 @@ const useGame = () => {
           body: JSON.stringify(ships),
         }
       );
-      console.log(response.json());
+
+      return response.ok;
     } catch (error) {
-      console.error(error);
+      console.error("Failed to place ships:", error);
+      return false;
     }
   };
   return {

@@ -12,17 +12,20 @@ const Grid = ({ label, placedShips }: GridProps) => {
     <div>
       <label className="block text-center text-xl">{label}</label>
       <table className="border-4 relative w-auto h-auto border-gray-400 ">
-        {rows.map((_, rowIndex) => (
-          <tr>
-            {cols.map((_, colIndex) => (
-              <Cell
-                rowIndex={rowIndex}
-                colIndex={colIndex}
-                placedShips={placedShips}
-              />
-            ))}
-          </tr>
-        ))}
+        <tbody>
+          {rows.map((_, rowIndex) => (
+            <tr key={rowIndex}>
+              {cols.map((_, colIndex) => (
+                <Cell
+                  key={colIndex + rowIndex}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  placedShips={placedShips}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

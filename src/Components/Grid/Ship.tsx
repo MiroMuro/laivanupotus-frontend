@@ -32,6 +32,7 @@ const Ship = ({ battleship }: ShipProps) => {
 
   return (
     <div
+      key={id}
       ref={setNodeRef}
       {...listeners}
       {...attributes}
