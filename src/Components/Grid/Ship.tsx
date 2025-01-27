@@ -5,7 +5,6 @@ interface ShipProps {
 }
 const Ship = ({ battleship }: ShipProps) => {
   const { id, type, coordinates, direction, isSunk } = battleship;
-  console.log("direction", direction);
   let height, width;
 
   if (direction === "vertical") {

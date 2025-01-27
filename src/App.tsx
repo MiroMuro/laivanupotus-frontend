@@ -15,6 +15,7 @@ import QuickPlay from "./Pages/Play/QuickPlay.tsx";
 import ProtectedGameRoute from "./Utils/ProtectedGameRoute.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
+import { WebSocketProvider } from "./Utils/WebSocketProvider.tsx";
 const Layout = () => (
   <BackgroundImage>
     <HeaderBar />
@@ -137,7 +138,9 @@ function App() {
 
   return (
     <div className="h-screen w-full">
-      <RouterProvider router={router} />
+      <WebSocketProvider>
+        <RouterProvider router={router} />
+      </WebSocketProvider>
     </div>
   );
 }

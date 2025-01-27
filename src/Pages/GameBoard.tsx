@@ -4,7 +4,9 @@ import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import { Ship, ShipType, DraggableShip } from "../Types/interfaces";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useWebSocket } from "../Utils/WebSocketProvider";
+
 import useGame from "../Utils/useGame";
 
 interface GameBoardProps {
@@ -13,6 +15,25 @@ interface GameBoardProps {
 }
 
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
+  const context = useWebSocket();
+
+  const { disconnect, subscribeToGameEvent, connected } = context;
+
+  useEffect(() => {
+    if (connected) {
+      subscribeToGameEvent(Number(gameId), "game", (data) => {
+        console.log(data);
+      });
+
+      subscribeToGameEvent(Number(gameId), "move", (data) => {
+        console.log(data);
+      });
+    }
+    return () => {
+      disconnect();
+    };
+  }, [connected]);
+
   const { placeShips } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
@@ -111,10 +132,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     playerId: string,
     placedShips: DraggableShip[]
   ) => {
-    let shipsWithLongId = placedShips.map(
-      (ship) => (ship.id = ship.id.slice(-1))
-    );
+    // let shipsWithLongId = placedShips.map(
+    //   (ship) => (ship.id = ship.id.slice(-1))
+    // );
     if (placedShips.length !== initialShipsState.length) return;
+    console.log("matchId", Number(matchId), "playerId", Number(playerId));
     placeShips(Number(matchId), Number(playerId), placedShips);
   };
 
@@ -148,7 +170,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
           <button
             className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative"
-            onClick={() => confirmShips(playerId, gameId, placedShips)}
+            onClick={() => confirmShips(gameId, playerId, placedShips)}
           >
             <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
               Confirm ships

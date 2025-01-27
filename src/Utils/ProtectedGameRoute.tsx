@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./Authprovider";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import GameBoard from "../Pages/GameBoard";
 const ProtectedGameRoute = () => {
   const { token } = useAuth();

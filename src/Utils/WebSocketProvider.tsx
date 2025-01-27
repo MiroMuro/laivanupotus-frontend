@@ -1,10 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { Client, Frame, StompSubscription } from "@stomp/stompjs";
-import { useAuth } from "./Authprovider";
+import { createContext, useContext } from "react";
 import { WebSocketHook } from "../Types/interfaces";
+import { useAuth } from "./Authprovider";
+import { useRef, useState } from "react";
+import { Client, StompSubscription } from "@stomp/stompjs";
 import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 
-const useWebSocket = (): WebSocketHook => {
+interface WebSocketContextType extends WebSocketHook {
+  connect: () => void;
+  disconnect: () => void;
+}
+
+const WebSocketContext = createContext<WebSocketContextType | null>(null);
+
+export const WebSocketProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { token } = useAuth();
   const stompClient = useRef<Client | null>(null);
   const subscriptions = useRef<{
@@ -16,8 +28,11 @@ const useWebSocket = (): WebSocketHook => {
   }>({});
   const [connected, setConnected] = useState<boolean>(false);
 
-  useEffect(() => {
-    //Initialize the Stomp client.
+  const connect = () => {
+    if (stompClient.current?.connected) {
+      console.log("Already connected to Stomp client");
+      return;
+    }
 
     const client = new Client({
       brokerURL: `${import.meta.env.VITE_BACKEND_BASE_URL}/ws-battleship`,
@@ -44,11 +59,19 @@ const useWebSocket = (): WebSocketHook => {
 
     client.activate();
     stompClient.current = client;
+  };
 
-    return () => {
-      client.deactivate();
-    };
-  }, [token]);
+  const disconnect = () => {
+    if (stompClient.current) {
+      Object.keys(subscriptions.current).forEach((gameId) => {
+        unsubscribeFromAllGameEvents(Number(gameId));
+      });
+    }
+
+    stompClient.current?.deactivate();
+    stompClient.current = null;
+    setConnected(false);
+  };
 
   const subscribeToGameEvent = (
     gameId: number,
@@ -84,44 +107,6 @@ const useWebSocket = (): WebSocketHook => {
     return subscription;
   };
 
-  /*const subscribeToGame = (
-    gameId: number,
-    callback: (data: any) => void,
-    joinOrCreate: "JOIN" | "CREATE"
-  ) => {
-    if (!stompClient.current?.connected) return;
-
-    //Sub to various game events
-    const gameSubscription = stompClient.current.subscribe(
-      `/topic/game/${gameId}`,
-      (message) => {
-        const data = JSON.parse(message.body);
-        callback(data);
-      }
-    );
-
-    const playerJoinedSubscription = stompClient.current.subscribe(
-      `/topic/game/${gameId}/player-joined`,
-      (message) => {
-        const data = JSON.parse(message.body);
-        callback(data);
-      }
-    );
-
-    const moveSubscription = stompClient.current.subscribe(
-      `/topic/game/${gameId}/move`,
-      (message) => {
-        const data = JSON.parse(message.body);
-        callback(data);
-      }
-    );
-
-    subscriptions.current[gameId] = {
-      game: gameSubscription,
-      playerJoined: playerJoinedSubscription,
-      move: moveSubscription,
-    };
-  };*/
   const unsubscribeFromAllGameEvents = (gameId: number) => {
     if (subscriptions.current[gameId]) {
       Object.values(subscriptions.current[gameId]).forEach((subscription) => {
@@ -144,12 +129,26 @@ const useWebSocket = (): WebSocketHook => {
     }
   };
 
-  return {
-    subscribeToGameEvent,
-    unsubscribeFromAllGameEvents,
-    connected,
-    unsubscribeFromSingleGameEvent,
-  };
+  return (
+    <WebSocketContext.Provider
+      value={{
+        subscribeToGameEvent,
+        unsubscribeFromAllGameEvents,
+        unsubscribeFromSingleGameEvent,
+        connected,
+        connect,
+        disconnect,
+      }}
+    >
+      {children}
+    </WebSocketContext.Provider>
+  );
 };
 
-export default useWebSocket;
+export const useWebSocket = () => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error("useWebSocket must be used within a WebSocketProvider");
+  }
+  return context;
+};

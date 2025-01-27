@@ -1,19 +1,16 @@
 import { useAuth } from "../../Utils/Authprovider";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import useWebSocket from "../../Utils/useWebSocket";
 import useGame from "../../Utils/useGame";
+import { useWebSocket } from "../../Utils/WebSocketProvider";
 const CreateGame = () => {
   const { createGame, currentGame, setCurrentGame, creatingGameLoading } =
     useGame();
   const { currentUserInformation } = useAuth();
   const [infoMessage, setInfoMessage] = useState("");
-  const {
-    subscribeToGameEvent,
-    connected,
-    unsubscribeFromSingleGameEvent,
-    unsubscribeFromAllGameEvents,
-  } = useWebSocket();
+  const context = useWebSocket();
+  const { connect, subscribeToGameEvent, unsubscribeFromSingleGameEvent } =
+    context;
   const playerId = currentUserInformation?.id;
   const navigate = useNavigate();
 
@@ -22,6 +19,7 @@ const CreateGame = () => {
   }
 
   const handleCreateGame = () => {
+    connect();
     if (
       (currentGame && currentGame.status === "WAITING_FOR_PLAYER") ||
       (currentGame && currentGame.status === "PLACING_SHIPS")
@@ -44,14 +42,6 @@ const CreateGame = () => {
           delete data.messageStatus;
           delete data.message;
           setCurrentGame(data);
-
-          subscribeToGameEvent(currentGame.id, "game", (data) => {
-            console.log("Game", data);
-          });
-
-          subscribeToGameEvent(currentGame.id, "move", (data) => {
-            console.log("Move", data);
-          });
         }
       });
     }
@@ -64,6 +54,7 @@ const CreateGame = () => {
   const navigateToPlay = () => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
       setTimeout(() => {
+        unsubscribeFromSingleGameEvent(currentGame.id, "playerJoined");
         navigate("/play/game/" + currentGame.id + "/" + playerId);
       }, 4000);
     }
