@@ -72,6 +72,12 @@ export type GameStatus =
   | "IN_PROGRESS"
   | "FINISHED";
 
+export enum matchStatus {
+  WAITING_FOR_PLAYER = "WAITING_FOR_PLAYER",
+  PLACING_SHIPS = "PLACING_SHIPS",
+  IN_PROGRESS = "IN_PROGRESS",
+  FINISHED = "FINISHED",
+}
 export interface CurrentGame {
   currentTurnPlayerId: null | number;
   endedAt: null | Date;
@@ -85,6 +91,10 @@ export interface CurrentGame {
   updatedAt: Date;
 }
 
+export interface GameStartOrEnd {
+  player: IngameUserProfileDto;
+  status: GameStatus;
+}
 export type Coordinate = {
   x: number;
   y: number;

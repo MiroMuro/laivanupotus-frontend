@@ -2,9 +2,13 @@ import useGame from "../../Utils/useGame";
 import { useAuth } from "../../Utils/Authprovider";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useWebSocket } from "../../Utils/WebSocketProvider";
+
 const JoinGame = () => {
   const { games, fetchGames, joinGame, currentGame, joiningGameLoading } =
     useGame();
+  const context = useWebSocket();
+  const { connect } = context;
   const { currentUserInformation } = useAuth();
   const navigate = useNavigate();
   const playerId = currentUserInformation?.id;
@@ -18,6 +22,7 @@ const JoinGame = () => {
 
   useEffect(() => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
+      connect();
       navigate("/play/game/" + currentGame.id + "/" + playerId);
     }
   }, [currentGame?.status, navigate]);

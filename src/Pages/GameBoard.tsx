@@ -3,7 +3,14 @@ import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
-import { Ship, ShipType, DraggableShip, Coordinate } from "../Types/interfaces";
+import {
+  Ship,
+  ShipType,
+  DraggableShip,
+  Coordinate,
+  GameStartOrEnd,
+  matchStatus,
+} from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import { useWebSocket } from "../Utils/WebSocketProvider";
 import useGame from "../Utils/useGame";
@@ -21,23 +28,50 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
   const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
+  const [gameStartOrEndData, setGameStartOrEndData] =
+    useState<GameStartOrEnd | null>(null);
   const { disconnect, subscribeToGameEvent, connected } = context;
 
   useEffect(() => {
-    if (connected) {
-      subscribeToGameEvent(Number(gameId), "game", (data) => {
-        console.log(data);
-      });
+    if (!connected) return;
 
-      subscribeToGameEvent(Number(gameId), "move", (data) => {
-        console.log(data);
-      });
-    }
+    //Game status subscription. Infroms the user of the start and end of the game.
+    subscribeToGameEvent(Number(gameId), "game", (data) => {
+      console.log("Game event", data);
+
+      setGameStartOrEndData(data);
+
+      if (data.status === matchStatus.IN_PROGRESS) {
+        console.log("Game started");
+        const isCurrentPlayerTurn = data.player.id === Number(playerId);
+
+        setIsYourTurn(isCurrentPlayerTurn);
+        setInfoMessage(isCurrentPlayerTurn ? "Your turn!" : "Opponents turn!");
+      }
+
+      if (data.status === matchStatus.FINISHED) {
+        console.log("Game finished");
+      }
+    });
+
+    //Move subscription. Informs the user of the moves made by the opponent.
+    subscribeToGameEvent(Number(gameId), "move", (data) => {
+      console.log(data);
+    });
+
     return () => {
       disconnect();
     };
-  }, [connected]);
+  }, [connected, subscribeToGameEvent, gameId, playerId]);
 
+  //Debug render to verify state updates
+  useEffect(() => {
+    console.log("Current state:", {
+      isYourTurn,
+      infoMessage,
+      gameStartOrEndData,
+    });
+  }, [isYourTurn, infoMessage, gameStartOrEndData]);
   const { placeShips } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
@@ -174,8 +208,13 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   };
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
-      <header className="w-full flex flex-row justify-center text-center">
-        <p className="text-xl">{infoMessage}</p>
+      <header className="w-2/3 flex ml-12 flex-row justify-normal text-center">
+        <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
+        <p className="flex-[2_1_0%] text-xl">
+          {gameStartOrEndData && (
+            <>Turn: {isYourTurn ? "Your turn" : "Opponents turn"}</>
+          )}
+        </p>
       </header>
       <div className="flex  flex-row justify-around align-middle">
         <DndContext
