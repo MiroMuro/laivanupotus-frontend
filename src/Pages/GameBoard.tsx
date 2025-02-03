@@ -38,9 +38,8 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   useEffect(() => {
     if (!connected) return;
-    console.log("Shots at Opponent: ", shotsAtOpponent);
-    //Game status subscription. Infroms the user of the start and end of the game.
-    subscribeToGameEvent(Number(gameId), "game", (data) => {
+
+    const handleGameEvent = (data: any) => {
       console.log("Game event", data);
 
       setGameStartOrEndData(data);
@@ -55,12 +54,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       if (data.status === matchStatus.FINISHED) {
         setInfoMessage("Game finished!");
       }
-    });
+    };
 
-    //Move subscription. Informs the user of the moves made by the opponent.
-    subscribeToGameEvent(Number(gameId), "move", (data: Move) => {
-      console.log("Move data", data);
-
+    const handleMove = (data: any) => {
       const isCurrentPlayerTurn =
         data.playerBehindTheMoveId !== Number(playerId);
 
@@ -69,20 +65,29 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       }
 
       setIsYourTurn(isCurrentPlayerTurn);
-    });
+    };
+
+    subscribeToGameEvent(Number(gameId), "game", handleGameEvent);
+    subscribeToGameEvent(Number(gameId), "move", handleMove);
 
     return () => {
       disconnect();
     };
-  }, [connected, subscribeToGameEvent, gameId, playerId]);
+  }, [subscribeToGameEvent, gameId, playerId]);
 
   let updateShotsAtYourBoard = (move: Move) => {
-    console.log("Opponets shot at my board", opponenstShotsAtYourBoard);
-    const updatedShots = [...opponenstShotsAtYourBoard];
-    updatedShots[move.y * 10 + move.x] = move;
-    setOpponentShotsAtYourBoard(updatedShots);
+    setOpponentShotsAtYourBoard((prev) => {
+      const updatedShots = [...prev];
+      updatedShots[move.y * 10 + move.x] = move;
+      return updatedShots;
+    });
   };
 
+  useEffect(() => {
+    if (!connected) {
+      setInfoMessage("Disconnected from game.");
+    }
+  }, [connected]);
   //Debug render to verify state updates
   useEffect(() => {
     console.log("Current state:", {
@@ -98,6 +103,12 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     shotsAtOpponent,
   ]);
 
+  useEffect(() => {
+    console.log(
+      "Shots updated:",
+      opponenstShotsAtYourBoard.filter((shot) => shot !== null)
+    );
+  }, [opponenstShotsAtYourBoard]);
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [

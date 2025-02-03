@@ -55,7 +55,7 @@ const ShotCell = ({ shot, id }: { shot: Move; id: string }) => {
         id={id}
         className={`border-2 border-black w-10 h-10 text-xs bg-battleship-blue-lighter cursor-not-allowed`}
       >
-        🟢
+        <span>⭕</span>
       </td>
     );
   } else {
@@ -65,7 +65,7 @@ const ShotCell = ({ shot, id }: { shot: Move; id: string }) => {
         id={id}
         className={`border-2 border-black w-10 h-10 text-xs bg-battleship-blue-lighter cursor-not-allowed`}
       >
-        🔴
+        <span className="flex items-center justify-center text-xl">❌</span>
       </td>
     );
   }
