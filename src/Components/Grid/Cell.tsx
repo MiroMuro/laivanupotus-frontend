@@ -2,13 +2,17 @@ interface CellProps {
   placedShips: DraggableShip[];
   rowIndex: number;
   colIndex: number;
+  shot: Move;
 }
 import { useDroppable } from "@dnd-kit/core";
-import { DraggableShip } from "../../Types/interfaces";
-const Cell = ({ placedShips, rowIndex, colIndex }: CellProps) => {
+import { DraggableShip, Move } from "../../Types/interfaces";
+const Cell = ({ placedShips, rowIndex, colIndex, shot }: CellProps) => {
   let id = `cell-${rowIndex}-${colIndex}`;
   const { setNodeRef } = useDroppable({ id: id });
   let regex = /^cell-[0-9]-[0-9]$/;
+  if (shot) {
+    console.log("SHOT HERE", shot);
+  }
   if (regex.test(id)) {
     return (
       <td
@@ -16,9 +20,11 @@ const Cell = ({ placedShips, rowIndex, colIndex }: CellProps) => {
         ref={setNodeRef}
         className="border-2 border-black w-10 h-10 text-xs relative"
       >
-        <span className="absolute inset-0 flex items-center justify-center text-xs opacity-50">
-          {id}
-        </span>
+        {shot && (
+          <span className="absolute inset-0 flex items-center justify-center text-xs opacity-50 z-15">
+            {shot.isHit ? "❌" : "⭕"}
+          </span>
+        )}
 
         {placedShips.length != 0 &&
           placedShips.map((ship) => {

@@ -7,7 +7,6 @@ import {
   Ship,
   ShipType,
   DraggableShip,
-  Coordinate,
   GameStartOrEnd,
   matchStatus,
   Move,
@@ -27,9 +26,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
   );
-  const [opponentShots, setOpponentShots] = useState<Move[]>(
-    Array(100).fill(null)
-  );
+  const [opponenstShotsAtYourBoard, setOpponentShotsAtYourBoard] = useState<
+    Move[]
+  >(Array(100).fill(null));
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
   const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
@@ -59,14 +58,30 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     });
 
     //Move subscription. Informs the user of the moves made by the opponent.
-    subscribeToGameEvent(Number(gameId), "move", (data) => {
-      console.log(data);
+    subscribeToGameEvent(Number(gameId), "move", (data: Move) => {
+      console.log("Move data", data);
+
+      const isCurrentPlayerTurn =
+        data.playerBehindTheMoveId !== Number(playerId);
+
+      if (isCurrentPlayerTurn) {
+        updateShotsAtYourBoard(data);
+      }
+
+      setIsYourTurn(isCurrentPlayerTurn);
     });
 
     return () => {
       disconnect();
     };
   }, [connected, subscribeToGameEvent, gameId, playerId]);
+
+  let updateShotsAtYourBoard = (move: Move) => {
+    console.log("Opponets shot at my board", opponenstShotsAtYourBoard);
+    const updatedShots = [...opponenstShotsAtYourBoard];
+    updatedShots[move.y * 10 + move.x] = move;
+    setOpponentShotsAtYourBoard(updatedShots);
+  };
 
   //Debug render to verify state updates
   useEffect(() => {
@@ -75,7 +90,14 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       infoMessage,
       gameStartOrEndData,
     });
-  }, [isYourTurn, infoMessage, gameStartOrEndData]);
+  }, [
+    isYourTurn,
+    infoMessage,
+    gameStartOrEndData,
+    opponenstShotsAtYourBoard,
+    shotsAtOpponent,
+  ]);
+
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
@@ -220,12 +242,25 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       isHit: false,
     };
 
-    let response = await makeMove(Number(gameId), Number(playerId), newMove);
-
-    if (response) {
-      updateShotsAtOpponents(response);
+    try {
+      let validatedMove = await makeMove(
+        Number(gameId),
+        Number(playerId),
+        newMove
+      );
+      if (validatedMove) {
+        updateShotsAtOpponents(validatedMove);
+      }
+      console.log("THe response of the move is:", validatedMove);
+    } catch (error) {
+      setTimeout(
+        () =>
+          setInfoMessage(
+            "An error occured while shooting at the opponent. Please try again"
+          ),
+        6000
+      );
     }
-    console.log("THe response of the move is:", response);
   };
 
   let updateShotsAtOpponents = (move: Move) => {
@@ -249,7 +284,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
           collisionDetection={closestCorners}
         >
           <Ships ships={ships} />
-          <Grid label="Your board" placedShips={placedShips} />
+          <Grid
+            label="Your board"
+            placedShips={placedShips}
+            opponentsShotsAtYourBoard={opponenstShotsAtYourBoard}
+          />
           <OpponentsGrid
             label="Opponents board"
             isYourTurn={isYourTurn}
