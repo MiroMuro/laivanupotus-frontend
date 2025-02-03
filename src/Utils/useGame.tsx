@@ -145,11 +145,16 @@ const useGame = () => {
           body: JSON.stringify(move),
         }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to make a move! Status: " + response.status);
+      }
+
       let responseMove = await response.json();
       return responseMove;
     } catch (error) {
       console.error("Failed to make a move:", error);
-      return move;
+      throw new Error("Failed to make a move");
     }
   };
   return {

@@ -1,14 +1,24 @@
+import { Move } from "../../Types/interfaces";
+
 interface CellProps {
   id: string;
   isYourTurn: boolean;
   shootAtEnemyCell: (x: number, y: number) => Promise<void>;
+  shot: Move;
 }
-const OpponentsCell = ({ id, isYourTurn, shootAtEnemyCell }: CellProps) => {
+const OpponentsCell = ({
+  id,
+  isYourTurn,
+  shootAtEnemyCell,
+  shot,
+}: CellProps) => {
   const handleCellClick = async (cellId: string) => {
     let [y, x] = cellId.slice(5).split("-").map(Number);
     shootAtEnemyCell(x, y);
   };
-
+  if (shot) {
+    return <ShotCell shot={shot} id={id} />;
+  }
   let regex = /^cell-[0-9]-[0-9]$/;
   if (regex.test(id)) {
     return (
@@ -37,5 +47,27 @@ const OpponentsCell = ({ id, isYourTurn, shootAtEnemyCell }: CellProps) => {
     </td>
   );
 };
-
+const ShotCell = ({ shot, id }: { shot: Move; id: string }) => {
+  if (shot.isHit) {
+    return (
+      <td
+        key={id}
+        id={id}
+        className={`border-2 border-black w-10 h-10 text-xs bg-battleship-blue-lighter cursor-not-allowed`}
+      >
+        🟢
+      </td>
+    );
+  } else {
+    return (
+      <td
+        key={id}
+        id={id}
+        className={`border-2 border-black w-10 h-10 text-xs bg-battleship-blue-lighter cursor-not-allowed`}
+      >
+        🔴
+      </td>
+    );
+  }
+};
 export default OpponentsCell;

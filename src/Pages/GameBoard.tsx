@@ -24,8 +24,12 @@ interface GameBoardProps {
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const context = useWebSocket();
 
-  const [shotsAtOpponents, setShotsAtOpponents] = useState<Coordinate[]>([]);
-  const [opponentShots, setOpponentShots] = useState<Coordinate[]>([]);
+  const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
+    Array(100).fill(null)
+  );
+  const [opponentShots, setOpponentShots] = useState<Move[]>(
+    Array(100).fill(null)
+  );
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
   const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
@@ -35,7 +39,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   useEffect(() => {
     if (!connected) return;
-
+    console.log("Shots at Opponent: ", shotsAtOpponent);
     //Game status subscription. Infroms the user of the start and end of the game.
     subscribeToGameEvent(Number(gameId), "game", (data) => {
       console.log("Game event", data);
@@ -218,9 +222,17 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
     let response = await makeMove(Number(gameId), Number(playerId), newMove);
 
+    if (response) {
+      updateShotsAtOpponents(response);
+    }
     console.log("THe response of the move is:", response);
   };
 
+  let updateShotsAtOpponents = (move: Move) => {
+    const updatedShots = [...shotsAtOpponent];
+    updatedShots[move.y * 10 + move.x] = move;
+    setShotsAtOpponent(updatedShots);
+  };
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-2/3 flex ml-12 flex-row justify-normal text-center">
@@ -242,6 +254,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
             label="Opponents board"
             isYourTurn={isYourTurn}
             shootAtEnemyCell={shootAtEnemyCell}
+            shotsAtOpponent={shotsAtOpponent}
           />
         </DndContext>
       </div>

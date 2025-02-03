@@ -709,6 +709,10 @@ video {
   display: table;
 }
 
+.grid{
+  display: grid;
+}
+
 .h-1\/2{
   height: 50%;
 }
