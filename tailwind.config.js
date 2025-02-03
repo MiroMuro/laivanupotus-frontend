@@ -8,6 +8,7 @@ export default {
       colors: {
         "battleship-blue": "#0A213D",
         "battleship-blue-light": "#0d2c52",
+        "battleship-blue-lighter": "#294363",
         "battleship-blue-dark": "#051221",
         "battleship-blue-darker": "#02060d",
       },

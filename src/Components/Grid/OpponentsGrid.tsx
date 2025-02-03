@@ -1,9 +1,10 @@
 import OpponentsCell from "./OpponentsCell";
-
 interface GridProps {
   label: string;
+  isYourTurn: boolean;
+  shootAtEnemyCell: (x: number, y: number) => Promise<void>;
 }
-const OpponentsGrid = ({ label }: GridProps) => {
+const OpponentsGrid = ({ label, isYourTurn, shootAtEnemyCell }: GridProps) => {
   const rows = Array(10).fill(null);
   const cols = Array(10).fill(null);
 
@@ -16,7 +17,14 @@ const OpponentsGrid = ({ label }: GridProps) => {
             <tr key={rowIndex}>
               {cols.map((_, colIndex) => {
                 const id = `cell-${rowIndex}-${colIndex}`;
-                return <OpponentsCell key={id} id={id} />;
+                return (
+                  <OpponentsCell
+                    key={id}
+                    id={id}
+                    isYourTurn={isYourTurn}
+                    shootAtEnemyCell={shootAtEnemyCell}
+                  />
+                );
               })}
             </tr>
           ))}

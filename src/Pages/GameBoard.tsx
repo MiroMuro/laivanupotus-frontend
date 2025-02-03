@@ -10,6 +10,7 @@ import {
   Coordinate,
   GameStartOrEnd,
   matchStatus,
+  Move,
 } from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import { useWebSocket } from "../Utils/WebSocketProvider";
@@ -42,15 +43,14 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       setGameStartOrEndData(data);
 
       if (data.status === matchStatus.IN_PROGRESS) {
-        console.log("Game started");
+        setInfoMessage("Game started!");
         const isCurrentPlayerTurn = data.player.id === Number(playerId);
 
         setIsYourTurn(isCurrentPlayerTurn);
-        setInfoMessage(isCurrentPlayerTurn ? "Your turn!" : "Opponents turn!");
       }
 
       if (data.status === matchStatus.FINISHED) {
-        console.log("Game finished");
+        setInfoMessage("Game finished!");
       }
     });
 
@@ -72,7 +72,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       gameStartOrEndData,
     });
   }, [isYourTurn, infoMessage, gameStartOrEndData]);
-  const { placeShips } = useGame();
+  const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
     {
@@ -172,6 +172,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   ) => {
     verifyAllShipsPlaced();
     verifyShipsNotAlreadyPlaced();
+
     let shipsWithLongId: DraggableShip[] = placedShips.map((ship) => ({
       ...ship,
       id: ship.id.slice(-1),
@@ -206,6 +207,20 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       return;
     }
   };
+
+  const shootAtEnemyCell = async (x: number, y: number) => {
+    const newMove: Move = {
+      x: x,
+      y: y,
+      playerBehindTheMoveId: Number(playerId),
+      isHit: false,
+    };
+
+    let response = await makeMove(Number(gameId), Number(playerId), newMove);
+
+    console.log("THe response of the move is:", response);
+  };
+
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-2/3 flex ml-12 flex-row justify-normal text-center">
@@ -223,7 +238,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         >
           <Ships ships={ships} />
           <Grid label="Your board" placedShips={placedShips} />
-          <OpponentsGrid label="Opponents board" />
+          <OpponentsGrid
+            label="Opponents board"
+            isYourTurn={isYourTurn}
+            shootAtEnemyCell={shootAtEnemyCell}
+          />
         </DndContext>
       </div>
       <div className="w-80 h-1/6  rounded-xl flex flex-row justify-start ml-14 gap-4">

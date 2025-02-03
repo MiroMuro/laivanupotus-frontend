@@ -4,6 +4,7 @@ import {
   NotOwnUserProfile,
   CurrentGame,
   DraggableShip,
+  Move,
 } from "../Types/interfaces";
 import { GameDto } from "../Types/interfaces";
 const useGame = () => {
@@ -124,6 +125,33 @@ const useGame = () => {
       return false;
     }
   };
+
+  const makeMove = async (
+    matchId: number,
+    playerId: number,
+    move: Move
+  ): Promise<Move> => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_BASE_URL
+        }/api/game/${matchId}/make-move?userId=${playerId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(move),
+        }
+      );
+      let responseMove = await response.json();
+      return responseMove;
+    } catch (error) {
+      console.error("Failed to make a move:", error);
+      return move;
+    }
+  };
   return {
     games,
     fetchGames,
@@ -137,6 +165,7 @@ const useGame = () => {
     joinGame,
     joiningGameLoading,
     placeShips,
+    makeMove,
   };
 };
 export default useGame;

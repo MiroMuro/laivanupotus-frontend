@@ -100,7 +100,7 @@ export type Coordinate = {
   y: number;
 };
 
-type Move = {
+export type Move = {
   x: number;
   y: number;
   playerBehindTheMoveId: number;
