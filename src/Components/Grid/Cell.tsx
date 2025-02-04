@@ -4,14 +4,20 @@ interface CellProps {
   colIndex: number;
   shot: Move;
 }
+import Miss from "../../assets/Miss.png";
+import Hit from "../../assets/Hit.png";
 import { useDroppable } from "@dnd-kit/core";
 import { DraggableShip, Move } from "../../Types/interfaces";
 const Cell = ({ placedShips, rowIndex, colIndex, shot }: CellProps) => {
   let id = `cell-${rowIndex}-${colIndex}`;
   const { setNodeRef } = useDroppable({ id: id });
   let regex = /^cell-[0-9]-[0-9]$/;
-  if (shot) {
-    console.log("SHOT HERE", shot);
+  if (!regex.test(id)) {
+    return (
+      <td key={id} ref={setNodeRef} className="border-2 border-black w-10 h-10">
+        Invalid Cell. Check ID!
+      </td>
+    );
   }
   if (regex.test(id)) {
     return (
@@ -22,7 +28,15 @@ const Cell = ({ placedShips, rowIndex, colIndex, shot }: CellProps) => {
       >
         {shot && (
           <span className="absolute inset-0 flex items-center justify-center text-xl  z-30">
-            {shot.isHit ? "⭕" : "❌"}
+            {shot.isHit ? (
+              <div>
+                <img src={Hit} />
+              </div>
+            ) : (
+              <div>
+                <img src={Miss} />
+              </div>
+            )}
           </span>
         )}
 
@@ -52,11 +66,6 @@ const Cell = ({ placedShips, rowIndex, colIndex, shot }: CellProps) => {
       </td>
     );
   }
-  return (
-    <td key={id} ref={setNodeRef} className="border-2 border-black w-10 h-10">
-      Invalid Cell. Check ID!
-    </td>
-  );
 };
 
 export default Cell;

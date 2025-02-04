@@ -214,7 +214,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       ...ship,
       id: ship.id.slice(-1),
     }));
-
     let success = await placeShips(
       Number(matchId),
       Number(playerId),
