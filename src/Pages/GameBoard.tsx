@@ -10,6 +10,7 @@ import {
   GameStartOrEnd,
   matchStatus,
   Move,
+  WebSocketMoveResponseDto,
 } from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import { useWebSocket } from "../Utils/WebSocketProvider";
@@ -32,6 +33,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
   const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
+  const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
   const { disconnect, subscribeToGameEvent, connected } = context;
@@ -56,14 +58,15 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       }
     };
 
-    const handleMove = (data: any) => {
+    const handleMove = (data: WebSocketMoveResponseDto) => {
       const isCurrentPlayerTurn =
-        data.playerBehindTheMoveId !== Number(playerId);
+        data.move.playerBehindTheMoveId !== Number(playerId);
 
       if (isCurrentPlayerTurn) {
-        updateShotsAtYourBoard(data);
+        updateShotsAtYourBoard(data.move);
       }
-
+      console.log("The message from the data is:", data.message);
+      setShotMessage(data.message);
       setIsYourTurn(isCurrentPlayerTurn);
     };
 
@@ -278,13 +281,22 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     updatedShots[move.y * 10 + move.x] = move;
     setShotsAtOpponent(updatedShots);
   };
+
+  let announceShotAtEnemyBoard = (move: Move) => {
+    if (move.isHit) {
+      setShotMessage("A Hit!");
+    } else {
+      setShotMessage("A Miss!");
+    }
+  };
+
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <header className="w-2/3 flex ml-12 flex-row justify-normal text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
         <p className="flex-[2_1_0%] text-xl">
           {gameStartOrEndData && (
-            <>Turn: {isYourTurn ? "Your turn" : "Opponents turn"}</>
+            <>{isYourTurn ? "Your turn" : "Opponents turn"}</>
           )}
         </p>
       </header>

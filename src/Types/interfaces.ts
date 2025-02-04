@@ -100,12 +100,17 @@ export type Coordinate = {
   y: number;
 };
 
-export type Move = {
+export interface Move {
   x: number;
   y: number;
   playerBehindTheMoveId: number;
   isHit: boolean;
-};
+}
+
+export interface WebSocketMoveResponseDto {
+  move: Move;
+  message: string;
+}
 
 export enum ShipType {
   CARRIER = 5,
