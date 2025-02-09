@@ -146,7 +146,11 @@ export interface GameDto {
   status: GameStatus;
 }
 
-export type SubscriptionType = "game" | "playerJoined" | "move";
+export type SubscriptionType =
+  | "game"
+  | "playerJoined"
+  | "move"
+  | "opponentDisconnected";
 export type SubscriptionCallback = (data: any) => void;
 
 export interface gameSubscriptions {

@@ -31,52 +31,92 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     Move[]
   >(Array(100).fill(null));
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
-  const [infoMessage, setInfoMessage] = useState<string>("Place your ships!");
+  const [infoMessage, setInfoMessage] = useState<string>(
+    `Drag your all of your ships to your board, and then press "Confirm ships"`
+  );
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-  const { disconnect, subscribeToGameEvent, connected } = context;
+  const { disconnect, subscribeToGameEvent, connected, connect } = context;
 
   useEffect(() => {
-    if (!connected) return;
+    //if (!connected) return;
 
-    const handleGameEvent = (data: any) => {
-      console.log("Game event", data);
+    const activeSubScriptions: { unsubscribe: () => void }[] = [];
 
-      setGameStartOrEndData(data);
+    const setupSubscriptions = () => {
+      const handleGameEvent = (data: any) => {
+        console.log("Game event", data);
 
-      if (data.status === matchStatus.IN_PROGRESS) {
-        setInfoMessage("Game started!");
-        const isCurrentPlayerTurn = data.player.id === Number(playerId);
+        setGameStartOrEndData(data);
 
+        if (data.status === matchStatus.IN_PROGRESS) {
+          setInfoMessage("Game started!");
+          const isCurrentPlayerTurn = data.player.id === Number(playerId);
+
+          setIsYourTurn(isCurrentPlayerTurn);
+        }
+
+        if (data.status === matchStatus.FINISHED) {
+          setInfoMessage("Game finished!");
+        }
+      };
+
+      const handleMove = (data: WebSocketMoveResponseDto) => {
+        const isCurrentPlayerTurn =
+          data.move.playerBehindTheMoveId !== Number(playerId);
+
+        if (isCurrentPlayerTurn) {
+          updateShotsAtYourBoard(data.move);
+        } else {
+          setShotMessage(data.message);
+          console.log("The message from the data is:", data.message);
+        }
         setIsYourTurn(isCurrentPlayerTurn);
-      }
+      };
 
-      if (data.status === matchStatus.FINISHED) {
-        setInfoMessage("Game finished!");
-      }
+      const handleOpponentDisconnected = (data: any) => {
+        setInfoMessage("Opponent disconnected");
+        console.log("Opponent disconnected", data);
+      };
+
+      const gameSub = subscribeToGameEvent(
+        Number(gameId),
+        "game",
+        handleGameEvent
+      );
+      const moveSub = subscribeToGameEvent(Number(gameId), "move", handleMove);
+      const opponentDisconnectedSub = subscribeToGameEvent(
+        Number(gameId),
+        "opponentDisconnected",
+        handleOpponentDisconnected
+      );
+      if (gameSub) activeSubScriptions.push(gameSub);
+      if (moveSub) activeSubScriptions.push(moveSub);
     };
 
-    const handleMove = (data: WebSocketMoveResponseDto) => {
-      const isCurrentPlayerTurn =
-        data.move.playerBehindTheMoveId !== Number(playerId);
-
-      if (isCurrentPlayerTurn) {
-        updateShotsAtYourBoard(data.move);
-      }
-      console.log("The message from the data is:", data.message);
-      setShotMessage(data.message);
-      setIsYourTurn(isCurrentPlayerTurn);
-    };
-
-    subscribeToGameEvent(Number(gameId), "game", handleGameEvent);
-    subscribeToGameEvent(Number(gameId), "move", handleMove);
+    if (!connected) {
+      connect();
+    } else {
+      setupSubscriptions();
+    }
 
     return () => {
-      disconnect();
+      console.log("In the cleanup");
+      console.log("The path is:", window.location.pathname);
+
+      activeSubScriptions.forEach((sub) => sub.unsubscribe());
+      // Only disconnect if the navigating away from the page
+      if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
+        console.log("Disconnecting");
+        disconnect();
+      }
     };
-  }, [subscribeToGameEvent, gameId, playerId]);
+    // return () => {
+    //   disconnect();
+    // };
+  }, [connected, gameId, playerId, connect, disconnect, subscribeToGameEvent]);
 
   let updateShotsAtYourBoard = (move: Move) => {
     setOpponentShotsAtYourBoard((prev) => {
@@ -87,10 +127,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   };
 
   useEffect(() => {
-    if (!connected) {
-      setInfoMessage("Disconnected from game.");
-    }
+    setInfoMessage(connected ? "Connected!" : "Attempting to reconnect...");
   }, [connected]);
+
   //Debug render to verify state updates
   useEffect(() => {
     console.log("Current state:", {
@@ -201,6 +240,10 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   };
 
   const resetShips = () => {
+    if (shipsPlaced) {
+      setInfoMessage("You can't reset ships after placing them");
+      return;
+    }
     setPlacedShips([]);
     setShips(initialShipsState);
   };
@@ -292,13 +335,14 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
-      <header className="w-2/3 flex ml-12 flex-row justify-normal text-center">
+      <header className="w-full flex flex-row justify-around text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
-        <p className="flex-[2_1_0%] text-xl">
+        <p className="flex-[1_1_0%] text-xl">
           {gameStartOrEndData && (
             <>{isYourTurn ? "Your turn" : "Opponents turn"}</>
           )}
         </p>
+        <p className="flex-[1_1_0%] text-xl">{shotMessage}</p>
       </header>
       <div className="flex  flex-row justify-around align-middle">
         <DndContext

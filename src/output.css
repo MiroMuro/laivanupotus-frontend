@@ -693,10 +693,6 @@ video {
   margin-bottom: auto;
 }
 
-.ml-12{
-  margin-left: 3rem;
-}
-
 .ml-14{
   margin-left: 3.5rem;
 }
@@ -759,6 +755,10 @@ video {
 
 .h-2\/5{
   height: 40%;
+}
+
+.h-2\/6{
+  height: 33.333333%;
 }
 
 .h-28{
@@ -829,10 +829,6 @@ video {
   width: 4rem;
 }
 
-.w-2\/3{
-  width: 66.666667%;
-}
-
 .w-4\/5{
   width: 80%;
 }
@@ -871,10 +867,6 @@ video {
 
 .flex-\[2\]{
   flex: 2;
-}
-
-.flex-\[2_1_0\%\]{
-  flex: 2 1 0%;
 }
 
 .flex-initial{
@@ -948,10 +940,6 @@ video {
 
 .items-center{
   align-items: center;
-}
-
-.justify-normal{
-  justify-content: normal;
 }
 
 .justify-start{

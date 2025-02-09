@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext } from "react";
 import { WebSocketHook } from "../Types/interfaces";
 import { useAuth } from "./Authprovider";
 import { useRef, useState } from "react";
@@ -23,12 +23,12 @@ export const WebSocketProvider = ({
     [key: string]: {
       game: StompSubscription;
       playerJoined: StompSubscription;
+      opponentDisconnected: StompSubscription;
       move: StompSubscription;
     };
   }>({});
   const [connected, setConnected] = useState<boolean>(false);
-
-  const connect = () => {
+  const connect = useCallback(() => {
     if (stompClient.current?.connected) {
       console.log("Already connected to Stomp client");
       return;
@@ -52,16 +52,30 @@ export const WebSocketProvider = ({
       console.log("Connected to websocket");
     };
 
+    client.onStompError = (frame) => {
+      console.error("Broker reported error: " + frame.headers["message"]);
+      console.error("Additional details: " + frame.body);
+    };
+
     client.onDisconnect = () => {
       setConnected(false);
       console.log("Disconnected from websocket");
     };
 
+    client.onWebSocketClose = () => {
+      //Attempt to reconnect after a brief delay
+      setTimeout(() => {
+        if (!client.connected) {
+          console.log("Attempting to reconnect to websocket");
+          client.activate();
+        }
+      }, 5000);
+    };
     client.activate();
     stompClient.current = client;
-  };
+  }, [token]);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
         unsubscribeFromAllGameEvents(Number(gameId));
@@ -71,18 +85,19 @@ export const WebSocketProvider = ({
     stompClient.current?.deactivate();
     stompClient.current = null;
     setConnected(false);
-  };
+  }, []);
 
   const subscribeToGameEvent = (
     gameId: number,
     eventType: SubscriptionType,
     callback: SubscriptionCallback
   ) => {
-    if (!stompClient.current?.connected) return;
+    if (!stompClient.current?.connected) return null;
 
     const topicPaths = {
       game: `/topic/game/${gameId}`,
       playerJoined: `/topic/game/${gameId}/player-joined`,
+      opponentDisconnected: `/topic/game/${gameId}/opponent-disconnected`,
       move: `/topic/game/${gameId}/move`,
     };
 
@@ -98,6 +113,7 @@ export const WebSocketProvider = ({
       subscriptions.current[gameId] = {
         game: null as unknown as StompSubscription,
         playerJoined: null as unknown as StompSubscription,
+        opponentDisconnected: null as unknown as StompSubscription,
         move: null as unknown as StompSubscription,
       };
     }
@@ -110,7 +126,9 @@ export const WebSocketProvider = ({
   const unsubscribeFromAllGameEvents = (gameId: number) => {
     if (subscriptions.current[gameId]) {
       Object.values(subscriptions.current[gameId]).forEach((subscription) => {
-        subscription.unsubscribe();
+        if (subscription) {
+          subscription.unsubscribe();
+        }
       });
       delete subscriptions.current[gameId];
     }
