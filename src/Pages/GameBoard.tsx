@@ -41,14 +41,10 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const { disconnect, subscribeToGameEvent, connected, connect } = context;
 
   useEffect(() => {
-    //if (!connected) return;
-
     const activeSubScriptions: { unsubscribe: () => void }[] = [];
 
     const setupSubscriptions = () => {
       const handleGameEvent = (data: any) => {
-        console.log("Game event", data);
-
         setGameStartOrEndData(data);
 
         if (data.status === matchStatus.IN_PROGRESS) {
@@ -71,7 +67,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
           updateShotsAtYourBoard(data.move);
         } else {
           setShotMessage(data.message);
-          console.log("The message from the data is:", data.message);
         }
         setIsYourTurn(isCurrentPlayerTurn);
       };
@@ -103,19 +98,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     }
 
     return () => {
-      console.log("In the cleanup");
-      console.log("The path is:", window.location.pathname);
-
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
       // Only disconnect if the navigating away from the page
-      if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
-        console.log("Disconnecting");
-        disconnect();
-      }
     };
-    // return () => {
-    //   disconnect();
-    // };
   }, [connected, gameId, playerId, connect, disconnect, subscribeToGameEvent]);
 
   let updateShotsAtYourBoard = (move: Move) => {
@@ -151,6 +136,23 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       opponenstShotsAtYourBoard.filter((shot) => shot !== null)
     );
   }, [opponenstShotsAtYourBoard]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      //A refresh.
+      disconnect(false);
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+
+      if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
+        disconnect(true);
+      }
+    };
+  }, [disconnect, gameId, playerId]);
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [

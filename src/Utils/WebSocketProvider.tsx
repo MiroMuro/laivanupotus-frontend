@@ -7,7 +7,7 @@ import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 
 interface WebSocketContextType extends WebSocketHook {
   connect: () => void;
-  disconnect: () => void;
+  disconnect: (permanent: boolean) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -28,6 +28,8 @@ export const WebSocketProvider = ({
     };
   }>({});
   const [connected, setConnected] = useState<boolean>(false);
+  const isPermanentDisconnect = useRef<boolean>(false);
+
   const connect = useCallback(() => {
     if (stompClient.current?.connected) {
       console.log("Already connected to Stomp client");
@@ -64,18 +66,22 @@ export const WebSocketProvider = ({
 
     client.onWebSocketClose = () => {
       //Attempt to reconnect after a brief delay
-      setTimeout(() => {
-        if (!client.connected) {
-          console.log("Attempting to reconnect to websocket");
-          client.activate();
-        }
-      }, 5000);
+      if (!isPermanentDisconnect.current) {
+        setTimeout(() => {
+          if (!client.connected) {
+            console.log("Attempting to reconnect to websocket");
+            client.activate();
+          }
+        }, 5000);
+      }
     };
     client.activate();
     stompClient.current = client;
   }, [token]);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback((permanent: boolean) => {
+    isPermanentDisconnect.current = permanent;
+
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
         unsubscribeFromAllGameEvents(Number(gameId));
