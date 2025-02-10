@@ -1,8 +1,7 @@
 import { useAuth } from "./Authprovider";
 import NotAuthenticated from "../Pages/NotAuthenticated";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading, decodedUser, currentUserInformation } =
-    useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
 

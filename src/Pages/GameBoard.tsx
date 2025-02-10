@@ -89,6 +89,8 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       );
       if (gameSub) activeSubScriptions.push(gameSub);
       if (moveSub) activeSubScriptions.push(moveSub);
+      if (opponentDisconnectedSub)
+        activeSubScriptions.push(opponentDisconnectedSub);
     };
 
     if (!connected) {
@@ -98,8 +100,15 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     }
 
     return () => {
+      //console.log("LEAVING OR REFRESHING PAGE");
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
-      // Only disconnect if the navigating away from the page
+      // Only disconnect permanently if the navigating away from the page
+      if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
+        disconnect(Number(gameId), true);
+        console.log("Leaving page");
+      } else {
+        console.log("Refreshing page");
+      }
     };
   }, [connected, gameId, playerId, connect, disconnect, subscribeToGameEvent]);
 
@@ -137,22 +146,24 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponenstShotsAtYourBoard]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      //A refresh.
-      disconnect(false);
-    };
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     //A refresh.
+  //     disconnect(false);
+  //   };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
 
-      if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
-        disconnect(true);
-      }
-    };
-  }, [disconnect, gameId, playerId]);
+  //     if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
+  //       console.log("Changing URL");
+  //       disconnect(true);
+  //     }
+  //   };
+  // }, [disconnect, gameId, playerId]);
+
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const initialShipsState: Ship[] = [
@@ -325,14 +336,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     const updatedShots = [...shotsAtOpponent];
     updatedShots[move.y * 10 + move.x] = move;
     setShotsAtOpponent(updatedShots);
-  };
-
-  let announceShotAtEnemyBoard = (move: Move) => {
-    if (move.isHit) {
-      setShotMessage("A Hit!");
-    } else {
-      setShotMessage("A Miss!");
-    }
   };
 
   return (

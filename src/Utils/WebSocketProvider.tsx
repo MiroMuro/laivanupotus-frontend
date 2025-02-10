@@ -7,7 +7,7 @@ import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 
 interface WebSocketContextType extends WebSocketHook {
   connect: () => void;
-  disconnect: (permanent: boolean) => void;
+  disconnect: (gameId: number, permanent: boolean) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -28,6 +28,7 @@ export const WebSocketProvider = ({
     };
   }>({});
   const [connected, setConnected] = useState<boolean>(false);
+  //Used to determine between a refresh and a permanent disconnect.
   const isPermanentDisconnect = useRef<boolean>(false);
 
   const connect = useCallback(() => {
@@ -67,6 +68,8 @@ export const WebSocketProvider = ({
     client.onWebSocketClose = () => {
       //Attempt to reconnect after a brief delay
       if (!isPermanentDisconnect.current) {
+        console.log("Im here");
+
         setTimeout(() => {
           if (!client.connected) {
             console.log("Attempting to reconnect to websocket");
@@ -79,9 +82,13 @@ export const WebSocketProvider = ({
     stompClient.current = client;
   }, [token]);
 
-  const disconnect = useCallback((permanent: boolean) => {
+  const disconnect = (gameId: number, permanent: boolean) => {
+    console.log("THe permanent in disconnect", permanent);
     isPermanentDisconnect.current = permanent;
-
+    stompClient.current?.publish({
+      destination: `/topic/game/${gameId}/opponent-disconnected`,
+      body: JSON.stringify({ message: "Opponent disconnected" }),
+    });
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
         unsubscribeFromAllGameEvents(Number(gameId));
@@ -91,7 +98,7 @@ export const WebSocketProvider = ({
     stompClient.current?.deactivate();
     stompClient.current = null;
     setConnected(false);
-  }, []);
+  };
 
   const subscribeToGameEvent = (
     gameId: number,

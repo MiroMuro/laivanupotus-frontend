@@ -15,6 +15,7 @@ import QuickPlay from "./Pages/Play/QuickPlay.tsx";
 import ProtectedGameRoute from "./Utils/ProtectedGameRoute.tsx";
 import { useAuth } from "./Utils/Authprovider.tsx";
 import ProtectedRoute from "./Utils/ProtectedRoute.tsx";
+import AlreadyAuthenticatedRoute from "./Utils/AlreadyAuthenticatedRoute.tsx";
 import { WebSocketProvider } from "./Utils/WebSocketProvider.tsx";
 const Layout = () => (
   <BackgroundImage>
@@ -63,7 +64,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { path: "Login", element: <Login /> },
+      {
+        path: "Login",
+        element: (
+          <AlreadyAuthenticatedRoute>
+            <Login />
+          </AlreadyAuthenticatedRoute>
+        ),
+      },
       {
         path: "Logout",
         element: (
@@ -72,7 +80,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { path: "Register", element: <Register /> },
+      {
+        path: "Register",
+        element: (
+          <AlreadyAuthenticatedRoute>
+            <Register />
+          </AlreadyAuthenticatedRoute>
+        ),
+      },
 
       { path: "*", element: <NotFound /> },
     ],
@@ -121,7 +136,7 @@ function App() {
     let [resource, options] = args;
     console.log("Options", options);
     const authHeader = new Headers();
-    // Only try add headers to routes that aren't login or register.
+    // Only try add Authorization headers to routes that aren't login or register.
     if (!isLoginOrRegisterReq(resource)) {
       if (user && token) {
         authHeader.append("Authorization", `Bearer ${token}`);
