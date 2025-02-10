@@ -13,6 +13,7 @@ import {
   WebSocketMoveResponseDto,
 } from "../Types/interfaces";
 import { useEffect, useState } from "react";
+import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
 import useGame from "../Utils/useGame";
 
@@ -146,65 +147,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponenstShotsAtYourBoard]);
 
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     //A refresh.
-  //     disconnect(false);
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-
-  //     if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
-  //       console.log("Changing URL");
-  //       disconnect(true);
-  //     }
-  //   };
-  // }, [disconnect, gameId, playerId]);
-
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
-  const initialShipsState: Ship[] = [
-    {
-      id: "ship-1x5",
-      type: ShipType.CARRIER,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
-    {
-      id: "ship-1x4",
-      type: ShipType.BATTLESHIP,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
-    {
-      id: "ship-1x3",
-      type: ShipType.CRUISER,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
+  //const initialShipsState: Ship[] = initialShipsStateArray;
 
-    {
-      id: "ship-1x2",
-      type: ShipType.DESTROYER,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
-    {
-      id: "ship-1x1",
-      type: ShipType.WARBOAT,
-      coordinates: [],
-      direction: "vertical",
-      isSunk: false,
-    },
-  ];
-  const [ships, setShips] = useState<Ship[]>(initialShipsState);
+  const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
   const {
     getShipStartingCellCoords,
     getShipCoords,
@@ -258,7 +205,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       return;
     }
     setPlacedShips([]);
-    setShips(initialShipsState);
+    setShips(initialShipsStateArray);
   };
 
   const confirmShips = async (
@@ -266,8 +213,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     playerId: string,
     placedShips: DraggableShip[]
   ) => {
-    verifyAllShipsPlaced();
-    verifyShipsNotAlreadyPlaced();
+    if (!shipsVerified()) {
+      return;
+    }
 
     let shipsWithLongId: DraggableShip[] = placedShips.map((ship) => ({
       ...ship,
@@ -289,18 +237,26 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     }
   };
 
+  const shipsVerified = () => {
+    return verifyAllShipsPlaced() && verifyShipsNotAlreadyPlaced();
+  };
+
   const verifyAllShipsPlaced = () => {
-    if (placedShips.length !== initialShipsState.length) {
+    if (placedShips.length !== initialShipsStateArray.length) {
+      console.log("Placed ships length:", placedShips.length);
+      console.log("Initial ships length:", initialShipsStateArray.length);
       setInfoMessage("Place all ships before confirming");
-      return;
+      return false;
     }
+    return true;
   };
 
   const verifyShipsNotAlreadyPlaced = () => {
     if (shipsPlaced) {
       setInfoMessage("Ships already placed");
-      return;
+      return false;
     }
+    return true;
   };
 
   const shootAtEnemyCell = async (x: number, y: number) => {
@@ -368,31 +324,65 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
           />
         </DndContext>
       </div>
-      <div className="w-80 h-1/6  rounded-xl flex flex-row justify-start ml-14 gap-4">
-        <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
-          <button
-            className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative"
-            onClick={() => resetShips()}
-          >
-            <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
-              Reset ships
-            </p>
-          </button>
-        </div>
-
-        <div className="bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 mx-4 transition transform hover:scale-105 active:scale-75">
-          <button
-            className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
-              shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
+      <footer className="w-full h-1/6 flex justify-around text-center">
+        <div className="flex-[1_1_0%] flex justify-around items-center text-xl gap-8">
+          <div
+            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 ${
+              shipsPlaced
+                ? ""
+                : "transition transform hover:scale-105 active:scale-75"
             }`}
-            onClick={() => confirmShips(gameId, playerId, placedShips)}
           >
-            <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
-              Confirm ships
-            </p>
-          </button>
+            <button
+              className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
+                shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
+              }`}
+              onClick={() => resetShips()}
+            >
+              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
+                Reset ships
+              </p>
+            </button>
+          </div>
+
+          <div
+            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4  ${
+              shipsPlaced
+                ? ""
+                : "transition transform hover:scale-105 active:scale-75"
+            }`}
+          >
+            <button
+              className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
+                shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
+              }`}
+              onClick={() => confirmShips(gameId, playerId, placedShips)}
+            >
+              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
+                Confirm ships
+              </p>
+            </button>
+          </div>
+
+          <div
+            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4  ${
+              shipsPlaced
+                ? ""
+                : "transition transform hover:scale-105 active:scale-75"
+            }`}
+          >
+            <button
+              className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative 
+                cursor-pointer"
+            >
+              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
+                Connect to chat
+              </p>
+            </button>
+          </div>
         </div>
-      </div>
+        <div className="flex-[2_1_0%] flex bg-white justify-center items-center text-xl gap-8"></div>
+      </footer>
     </div>
   );
 };

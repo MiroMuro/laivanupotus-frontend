@@ -68,8 +68,6 @@ export const WebSocketProvider = ({
     client.onWebSocketClose = () => {
       //Attempt to reconnect after a brief delay
       if (!isPermanentDisconnect.current) {
-        console.log("Im here");
-
         setTimeout(() => {
           if (!client.connected) {
             console.log("Attempting to reconnect to websocket");
@@ -83,18 +81,36 @@ export const WebSocketProvider = ({
   }, [token]);
 
   const disconnect = (gameId: number, permanent: boolean) => {
-    console.log("THe permanent in disconnect", permanent);
     isPermanentDisconnect.current = permanent;
+    if (StompClientCurrentExists()) {
+      sendDisconnectionMessageThroughWebSocket(gameId);
+      unsubscribeStompClientFromAllEvents();
+      shutDownStompClient();
+    } else {
+      console.log("Stomp client does not exist");
+    }
+  };
+
+  const StompClientCurrentExists = () => {
+    return stompClient.current;
+  };
+
+  const sendDisconnectionMessageThroughWebSocket = (gameId: number) => {
     stompClient.current?.publish({
       destination: `/topic/game/${gameId}/opponent-disconnected`,
       body: JSON.stringify({ message: "Opponent disconnected" }),
     });
+  };
+
+  const unsubscribeStompClientFromAllEvents = () => {
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
         unsubscribeFromAllGameEvents(Number(gameId));
       });
     }
+  };
 
+  const shutDownStompClient = () => {
     stompClient.current?.deactivate();
     stompClient.current = null;
     setConnected(false);
