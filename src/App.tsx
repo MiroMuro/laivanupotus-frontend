@@ -130,15 +130,17 @@ function App() {
   };
 
   const { fetch: origFetch } = window;
-  const { user, token } = useAuth();
+  const { decodedUser, token } = useAuth();
 
   window.fetch = async (...args) => {
+    console.log("The user is", decodedUser);
+    console.log("The token is", token);
     let [resource, options] = args;
     console.log("Options", options);
     const authHeader = new Headers();
     // Only try add Authorization headers to routes that aren't login or register.
     if (!isLoginOrRegisterReq(resource)) {
-      if (user && token) {
+      if (decodedUser && token) {
         authHeader.append("Authorization", `Bearer ${token}`);
         options = appendAuthHeaders(options, authHeader);
       } else {

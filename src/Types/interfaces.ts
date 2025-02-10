@@ -164,7 +164,7 @@ export interface WebSocketHook {
     gameId: number,
     eventType: SubscriptionType,
     callback: (data: any) => void
-  ) => StompSubscription | undefined;
+  ) => StompSubscription | null;
   connected: boolean;
   unsubscribeFromAllGameEvents: (gameId: number) => void;
   unsubscribeFromSingleGameEvent: (

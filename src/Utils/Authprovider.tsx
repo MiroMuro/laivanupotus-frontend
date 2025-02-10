@@ -1,17 +1,21 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { AuthContextType } from "../Types/interfaces";
 import { OwnUserProfile } from "../Types/interfaces";
 import useCookie from "./useCookie";
 export const AuthContext = createContext<AuthContextType | null>(null);
-export const AuthProvider = ({ children }) => {
-  const [currentUserInformation, setCurrentUserInformation] = useState<
-    OwnUserProfile | undefined
-  >();
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [currentUserInformation, setCurrentUserInformation] =
+    useState<OwnUserProfile | null>(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [decodedUser, setDecodedUser] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
-
   const { setCookie, getCookie, clearCookie } = useCookie();
 
   const isTokenExpired = (decodedToken: JwtPayload) => {
@@ -155,7 +159,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     clearCookie("currentUserInformation");
-    setCurrentUserInformation(undefined);
+    setCurrentUserInformation(null);
     setDecodedUser(null);
     setToken(null);
   };
