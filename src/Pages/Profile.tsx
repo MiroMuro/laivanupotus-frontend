@@ -35,11 +35,14 @@ const Profile = () => {
   const [modal, setModal] = useState(false);
 
   return (
-    <div className="h-3/4 w-1/4 border-4 border-gray-400 bg-battleship-blue-light text-white rounded-xl flex flex-col justify-start items-center">
+    <div className="h-2/3 w-1/4 border-4 border-gray-400 bg-battleship-blue-light text-white rounded-xl flex flex-col justify-evenly items-center">
       <h1 className="text-4xl border-b-4 border-gray-400 text-center w-full py-4">
         Your profile
       </h1>
-      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
+      <div className="flex flex-1 w-full max-h-20 relative flex-row justify-between items-center px-6">
+        <label className="absolute top-1 left-24 bg-battleship-blue-light">
+          Your username
+        </label>
         <img
           src={user}
           className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
@@ -59,7 +62,10 @@ const Profile = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
+      <div className="flex flex-1 w-full max-h-20  relative flex-row justify-between items-center px-6">
+        <label className="absolute top-1 left-24 bg-battleship-blue-light">
+          Your email
+        </label>
         <img
           src={mail}
           className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
@@ -79,7 +85,10 @@ const Profile = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
+      <div className="flex flex-1 w-full max-h-20  flex-row justify-between relative items-center px-6">
+        <label className="absolute top-1 left-24 bg-battleship-blue-light">
+          Your account age
+        </label>
         <img
           src={calendar}
           className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
@@ -92,7 +101,10 @@ const Profile = () => {
           </p>
         </div>
       </div>
-      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
+      <div className="flex flex-1 w-full max-h-20 relative flex-row justify-between items-center px-6">
+        <label className="absolute -top-3 left-24 bg-battleship-blue-light">
+          Your account game statistics
+        </label>
         <img
           src={chart}
           className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
