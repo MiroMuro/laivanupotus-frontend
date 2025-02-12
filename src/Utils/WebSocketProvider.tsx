@@ -68,6 +68,8 @@ export const WebSocketProvider = ({
     client.onWebSocketClose = () => {
       //Attempt to reconnect after a brief delay
       if (!isPermanentDisconnect.current) {
+        setConnected(false);
+        console.log("Disconnected from websocket");
         setTimeout(() => {
           if (!client.connected) {
             console.log("Attempting to reconnect to websocket");

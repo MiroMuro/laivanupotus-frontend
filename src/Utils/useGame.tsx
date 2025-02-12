@@ -57,6 +57,9 @@ const useGame = () => {
   const createGame = async (playerId: number) => {
     setCreatingGameLoading(true);
     try {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 20000);
+
       const response = await fetch(
         `${
           import.meta.env.VITE_BACKEND_BASE_URL
@@ -66,14 +69,36 @@ const useGame = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          signal: abortController.signal,
         }
       );
-      setCreatingGameLoading(false);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error("Failed to create a game! Status: " + response.status);
+      }
       let game = await response.json();
       setCurrentGame(game);
-    } catch (error) {
+      return game;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setCreatingGameLoading(false);
+        if (error.name === "AbortError") {
+          console.error("Failed to create a game: Timeout");
+          throw new Error("Failed to create a game: Timeout");
+        } else if (
+          error.name === "TypeError" &&
+          error.message.includes("NetworkError")
+        ) {
+          throw new Error(
+            "Game server is currently unavailable. Please try again in a few moments."
+          );
+        }
+        console.error(error);
+        throw error;
+      }
+    } finally {
       setCreatingGameLoading(false);
-      console.error(error);
     }
   };
 

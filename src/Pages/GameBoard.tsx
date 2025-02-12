@@ -1,5 +1,6 @@
 import Grid from "../Components/Grid/Grid";
 import OpponentsGrid from "../Components/Grid/OpponentsGrid";
+import ConnectionStatusNotification from "../Components/Grid/ConnectionStatusNotification";
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
@@ -121,9 +122,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     });
   };
 
-  useEffect(() => {
-    setInfoMessage(connected ? "Connected!" : "Attempting to reconnect...");
-  }, [connected]);
+  // useEffect(() => {
+  //   setInfoMessage(
+  //     connected ? "Connected to match!" : "Attempting to reconnect to match..."
+  //   );
+  // }, [connected]);
 
   //Debug render to verify state updates
   useEffect(() => {
@@ -296,6 +299,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
+      <ConnectionStatusNotification connected={connected} />
       <header className="w-full flex flex-row justify-around text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
         <p className="flex-[1_1_0%] text-xl">
