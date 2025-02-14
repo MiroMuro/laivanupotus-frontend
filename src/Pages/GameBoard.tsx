@@ -6,12 +6,12 @@ import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import {
   Ship,
-  ShipType,
   DraggableShip,
   GameStartOrEnd,
   matchStatus,
   Move,
   WebSocketMoveResponseDto,
+  GameStatus,
 } from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
@@ -25,7 +25,8 @@ interface GameBoardProps {
 
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const context = useWebSocket();
-
+  const { placeShips, makeMove, getGameState } = useGame();
+  const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
   );
@@ -122,13 +123,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     });
   };
 
-  // useEffect(() => {
-  //   setInfoMessage(
-  //     connected ? "Connected to match!" : "Attempting to reconnect to match..."
-  //   );
-  // }, [connected]);
-
-  //Debug render to verify state updates
   useEffect(() => {
     console.log("Current state:", {
       isYourTurn,
@@ -150,8 +144,19 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponenstShotsAtYourBoard]);
 
-  const { placeShips, makeMove } = useGame();
-  const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
+  useEffect(() => {
+    async function fetchData(
+      matchId: number,
+      playerId: number,
+      gameStatus: GameStatus
+    ) {
+      const response = await getGameState(matchId, playerId, gameStatus);
+      console.log("THe response of the game state is:", response);
+    }
+
+    fetchData(Number(gameId), Number(playerId), "PLACING_SHIPS");
+  }, []);
+
   //const initialShipsState: Ship[] = initialShipsStateArray;
 
   const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
@@ -299,7 +304,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
-      <ConnectionStatusNotification connected={connected} />
+      <ConnectionStatusNotification />
       <header className="w-full flex flex-row justify-around text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
         <p className="flex-[1_1_0%] text-xl">

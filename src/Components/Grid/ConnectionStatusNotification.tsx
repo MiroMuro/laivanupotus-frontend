@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-const ConnectionStatusNotification = ({
-  connected,
-}: {
-  connected: boolean;
-}) => {
+import { useWebSocket } from "../../Utils/WebSocketProvider";
+const ConnectionStatusNotification = () => {
+  const context = useWebSocket();
+  const { connected } = context;
+
+  console.log("Connected in ConnectionStatusNotification", connected);
   const [isVisible, setIsVisible] = useState(true);
   const [shouldShow, setShouldShow] = useState(true);
 
@@ -35,7 +36,7 @@ const ConnectionStatusNotification = ({
         }
       }}
     >
-      {connected ? "Connected" : "Disconnected"}
+      {connected ? "Connected" : "Disconnected. Reconnecting..."}
     </div>
   );
 };

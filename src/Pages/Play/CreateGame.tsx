@@ -11,11 +11,17 @@ const CreateGame = () => {
   const [infoMessage, setInfoMessage] = useState("");
   const [shouldShowInfoMessage, setShouldShowInfoMessage] = useState(false);
   const context = useWebSocket();
-  const { connect, subscribeToGameEvent, unsubscribeFromSingleGameEvent } =
-    context;
+  const {
+    connect,
+    connected,
+    subscribeToGameEvent,
+    unsubscribeFromSingleGameEvent,
+    disconnect,
+  } = context;
   const playerId = currentUserInformation?.id;
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isWebSocketConnecting, setIsWebSocketConnecting] = useState(false);
   if (!playerId) {
     return <div>Couldn't fetch player Id, please login and try again.</div>;
   }
@@ -30,10 +36,13 @@ const CreateGame = () => {
       try {
         setShouldShowInfoMessage(false);
         const game = await createGame(playerId);
-        connect();
+        setCurrentGame(game);
+
+        setIsWebSocketConnecting(true);
+        await connect();
+        setIsWebSocketConnecting(false);
       } catch (error) {
         if (error instanceof Error) {
-          console.log("THe error is", { error });
           setShouldShowInfoMessage(false);
           displayErrorMessageFor10Seconds(error.message);
           return;
@@ -71,10 +80,12 @@ const CreateGame = () => {
     }, 10000);
   };
 
-  useEffect(() => {});
-
   useEffect(() => {
-    if (currentGame?.id) {
+    console.log("CurrentGame", currentGame);
+    console.log("Connected", connected);
+    console.log("IsWebSocketConnecting", isWebSocketConnecting);
+    if (currentGame?.id && connected && !isWebSocketConnecting) {
+      console.log("Subscribing to playerJoined event");
       subscribeToGameEvent(currentGame.id, "playerJoined", (data) => {
         console.log("Player joined", data);
 
@@ -85,11 +96,23 @@ const CreateGame = () => {
         }
       });
     }
-  }, [currentGame?.id]);
+    return () => {
+      // Only disconnect permanently if the navigating away from the page
+      if (window.location.pathname !== `/play/create`) {
+        if (currentGame?.id && connected) {
+          disconnect(Number(currentGame?.id), true);
+          console.log("Disconnecting permanently. Shutting down stomp client");
+        }
+        console.log("Navigating away from create game page");
+      } else {
+        console.log("Refreshing page");
+      }
+    };
+  }, [currentGame?.status, connected, isWebSocketConnecting]);
 
   useEffect(() => {
     navigateToPlay();
-  }, [currentGame?.status]);
+  }, [currentGame?.status, connected, isWebSocketConnecting]);
 
   const navigateToPlay = () => {
     if (currentGame && currentGame.status === "PLACING_SHIPS") {
@@ -142,7 +165,7 @@ const CreateGame = () => {
       <h2>
         {!!currentGame && currentGame.status === "PLACING_SHIPS" && (
           <>
-            <h2 className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4">
               Opponent found!{" "}
               <div className="loading-dots">
                 Loading game
@@ -150,7 +173,7 @@ const CreateGame = () => {
                 <span></span>
                 <span></span>
               </div>{" "}
-            </h2>{" "}
+            </div>{" "}
           </>
         )}
       </h2>

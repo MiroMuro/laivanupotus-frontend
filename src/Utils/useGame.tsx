@@ -5,6 +5,7 @@ import {
   CurrentGame,
   DraggableShip,
   Move,
+  GameStatus,
 } from "../Types/interfaces";
 import { GameDto } from "../Types/interfaces";
 const useGame = () => {
@@ -78,7 +79,7 @@ const useGame = () => {
         throw new Error("Failed to create a game! Status: " + response.status);
       }
       let game = await response.json();
-      setCurrentGame(game);
+      //setCurrentGame(game);
       return game;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -182,6 +183,40 @@ const useGame = () => {
       throw new Error("Failed to make a move");
     }
   };
+
+  const getGameState = async (
+    matchId: number,
+    playerId: number,
+    gameStatus: GameStatus
+  ) => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_BASE_URL
+        }/api/game/${matchId}/gamestate?userId=${playerId}?gameStatus=${gameStatus}`,
+        {
+          method: "GET",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to get game state! Status: " + response.status);
+      }
+
+      let gameState = await response.json();
+      return gameState;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Failed to get game state:", error);
+        throw new Error("Failed to get game state");
+      }
+    }
+  };
   return {
     games,
     fetchGames,
@@ -196,6 +231,7 @@ const useGame = () => {
     joiningGameLoading,
     placeShips,
     makeMove,
+    getGameState,
   };
 };
 export default useGame;

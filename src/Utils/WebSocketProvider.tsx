@@ -31,7 +31,7 @@ export const WebSocketProvider = ({
   //Used to determine between a refresh and a permanent disconnect.
   const isPermanentDisconnect = useRef<boolean>(false);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (stompClient.current?.connected) {
       console.log("Already connected to Stomp client");
       return;
@@ -69,7 +69,7 @@ export const WebSocketProvider = ({
       //Attempt to reconnect after a brief delay
       if (!isPermanentDisconnect.current) {
         setConnected(false);
-        console.log("Disconnected from websocket");
+        console.log("Disconnected from websocket in onWebSocketClose");
         setTimeout(() => {
           if (!client.connected) {
             console.log("Attempting to reconnect to websocket");
