@@ -16,7 +16,7 @@ const CreateGame = () => {
     connected,
     subscribeToGameEvent,
     unsubscribeFromSingleGameEvent,
-    disconnect,
+    disconnectFromCreateGame,
   } = context;
   const playerId = currentUserInformation?.id;
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ const CreateGame = () => {
       // Only disconnect permanently if the navigating away from the page
       if (window.location.pathname !== `/play/create`) {
         if (currentGame?.id && connected) {
-          disconnect(Number(currentGame?.id), true);
+          disconnectFromCreateGame(true);
           console.log("Disconnecting permanently. Shutting down stomp client");
         }
         console.log("Navigating away from create game page");

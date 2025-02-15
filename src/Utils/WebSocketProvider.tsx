@@ -8,6 +8,8 @@ import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 interface WebSocketContextType extends WebSocketHook {
   connect: () => void;
   disconnect: (gameId: number, permanent: boolean) => void;
+  disconnectFromCreateGame: (permanent: boolean) => void;
+  sendPageRefreshMessageThroughWebSocket: (gameId: number) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -83,9 +85,10 @@ export const WebSocketProvider = ({
   }, [token]);
 
   const disconnect = (gameId: number, permanent: boolean) => {
+    console.log("Disconnecting from websocket");
     isPermanentDisconnect.current = permanent;
     if (StompClientCurrentExists()) {
-      sendDisconnectionMessageThroughWebSocket(gameId);
+      sendDisconnectionMessageThroughWebSocket(gameId, "/play");
       unsubscribeStompClientFromAllEvents();
       shutDownStompClient();
     } else {
@@ -93,17 +96,44 @@ export const WebSocketProvider = ({
     }
   };
 
+  const disconnectFromCreateGame = (permanent: boolean) => {
+    isPermanentDisconnect.current = permanent;
+    if (StompClientCurrentExists()) {
+      unsubscribeStompClientFromAllEvents();
+      shutDownStompClient();
+    } else {
+      console.log("Stomp client does not exist");
+    }
+  };
   const StompClientCurrentExists = () => {
     return stompClient.current;
   };
 
-  const sendDisconnectionMessageThroughWebSocket = (gameId: number) => {
+  const sendDisconnectionMessageThroughWebSocket = (
+    gameId: number,
+    pathName: string
+  ) => {
     stompClient.current?.publish({
       destination: `/topic/game/${gameId}/opponent-disconnected`,
-      body: JSON.stringify({ message: "Opponent disconnected" }),
+      body: JSON.stringify({
+        message: "Opponent disconnected due to navigation",
+        type: "NAVIGATION",
+        timestamp: new Date().getTime(),
+        path: pathName,
+      }),
     });
   };
 
+  const sendPageRefreshMessageThroughWebSocket = (gameId: number) => {
+    stompClient.current?.publish({
+      destination: `/topic/game/${gameId}/opponent-disconnected`,
+      body: JSON.stringify({
+        message: "Opponent reconnecting",
+        type: "REFRESH",
+        timestamp: new Date().getTime(),
+      }),
+    });
+  };
   const unsubscribeStompClientFromAllEvents = () => {
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
@@ -187,6 +217,8 @@ export const WebSocketProvider = ({
         connected,
         connect,
         disconnect,
+        disconnectFromCreateGame,
+        sendPageRefreshMessageThroughWebSocket,
       }}
     >
       {children}

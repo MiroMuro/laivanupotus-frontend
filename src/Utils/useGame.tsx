@@ -193,7 +193,7 @@ const useGame = () => {
       const response = await fetch(
         `${
           import.meta.env.VITE_BACKEND_BASE_URL
-        }/api/game/${matchId}/gamestate?userId=${playerId}?gameStatus=${gameStatus}`,
+        }/api/game/${matchId}/gamestate?userId=${playerId}&gameStatus=${gameStatus}`,
         {
           method: "GET",
 

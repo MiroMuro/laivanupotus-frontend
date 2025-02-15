@@ -17,13 +17,14 @@ import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
 import useGame from "../Utils/useGame";
-
+import { useLocation, useBeforeUnload } from "react-router";
 interface GameBoardProps {
   gameId: string;
   playerId: string;
 }
 
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
+  const location = useLocation();
   const context = useWebSocket();
   const { placeShips, makeMove, getGameState } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
@@ -41,7 +42,19 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-  const { disconnect, subscribeToGameEvent, connected, connect } = context;
+  const {
+    disconnect,
+    subscribeToGameEvent,
+    connected,
+    connect,
+    sendPageRefreshMessageThroughWebSocket,
+  } = context;
+  const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
+  const {
+    getShipStartingCellCoords,
+    getShipCoords,
+    doesShipCollideWithPlacedShips,
+  } = useShip();
 
   useEffect(() => {
     const activeSubScriptions: { unsubscribe: () => void }[] = [];
@@ -51,6 +64,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         setGameStartOrEndData(data);
 
         if (data.status === matchStatus.IN_PROGRESS) {
+          console.log("Game started!");
           setInfoMessage("Game started!");
           const isCurrentPlayerTurn = data.player.id === Number(playerId);
 
@@ -107,6 +121,16 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
       // Only disconnect permanently if the navigating away from the page
       if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
+        const data = JSON.stringify({
+          message: "Opponent left the game",
+          type: "LEAVE",
+          timestamp: new Date().getTime(),
+        });
+
+        const blob = new Blob([data], { type: "application/json" });
+
+        navigator.sendBeacon(`/api/game/${gameId}/leave`, blob);
+
         disconnect(Number(gameId), true);
         console.log("Leaving page");
       } else {
@@ -144,27 +168,56 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponenstShotsAtYourBoard]);
 
-  useEffect(() => {
-    async function fetchData(
-      matchId: number,
-      playerId: number,
-      gameStatus: GameStatus
-    ) {
-      const response = await getGameState(matchId, playerId, gameStatus);
-      console.log("THe response of the game state is:", response);
+  useBeforeUnload((e) => {
+    if (connected) {
+      sendPageRefreshMessageThroughWebSocket(Number(gameId));
     }
+  });
 
-    fetchData(Number(gameId), Number(playerId), "PLACING_SHIPS");
-  }, []);
+  useEffect(() => {
+    // const handleUnload = () =>{
+    //   if(connected){
+    //     const data = JSON.stringify({
+    //       type: "LEAVE",
+    //       timestamp: new Date().toISOString()
+    //     });
+    //     const blob = new Blob([data], {type: "application/json"});
+    //     navigator.sendBeacon(`/api/game/${gameId}/leave`, blob);
+    //   }
+    // };
+    // window.addEventListener("unload", handleUnload);
+    // return () => window.removeEventListener("unload", handleUnload);
+  }, [connected, gameId]);
+  // useEffect(() => {
+  //   const onBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     console.log("Im in onBeforeUnload");
 
-  //const initialShipsState: Ship[] = initialShipsStateArray;
+  //     e.preventDefault();
 
-  const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
-  const {
-    getShipStartingCellCoords,
-    getShipCoords,
-    doesShipCollideWithPlacedShips,
-  } = useShip();
+  //     return "Are you sure you want to leave?";
+  //   };
+
+  //   window.addEventListener("beforeunload", onBeforeUnload);
+
+  //   async function fetchData(
+  //     matchId: number,
+  //     playerId: number,
+  //     gameStatus: GameStatus
+  //   ) {
+  //     const response = await getGameState(
+  //       Number(matchId),
+  //       Number(playerId),
+  //       gameStatus
+  //     );
+  //     console.log("THe response of the game state is:", response);
+  //   }
+
+  //   fetchData(Number(gameId), Number(playerId), "PLACING_SHIPS");
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", onBeforeUnload);
+  //   };
+  // }, []);
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
