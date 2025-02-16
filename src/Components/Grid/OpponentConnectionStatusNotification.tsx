@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { useWebSocket } from "../../Utils/WebSocketProvider";
-const ConnectionStatusNotification = ({}) => {
-  const context = useWebSocket();
-  const { connected } = context;
-
-  console.log("Connected in ConnectionStatusNotification", connected);
+const OpponentConnectionStatusNotification = ({
+  message,
+}: {
+  message: string;
+}) => {
   const [isVisible, setIsVisible] = useState(true);
   const [shouldShow, setShouldShow] = useState(true);
-
+  console.log("THIS IS THE MESSAGE IN OPPONENT CONNECTIONSTAUS", message);
   useEffect(() => {
     const initialTimer = setTimeout(() => {
       setIsVisible(false);
@@ -17,17 +16,17 @@ const ConnectionStatusNotification = ({}) => {
   }, []);
 
   useEffect(() => {
-    if (!connected) {
+    if (!message) {
       setShouldShow(true);
       setIsVisible(true);
     }
-  }, [connected]);
+  }, [message]);
 
   if (!shouldShow) return null;
 
   return (
     <div
-      className={`connection-status-slider bg-battleship-blue-light ${
+      className={`opponent-connection-status-slider bg-battleship-blue-light ${
         isVisible ? "slide-in" : "slide-out"
       }`}
       onAnimationEnd={() => {
@@ -36,9 +35,11 @@ const ConnectionStatusNotification = ({}) => {
         }
       }}
     >
-      {connected ? "Connected" : "Disconnected. Reconnecting..."}
+      {message
+        ? `Connected ${message}`
+        : `Disconnected. Reconnecting... ${message}`}
     </div>
   );
 };
 
-export default ConnectionStatusNotification;
+export default OpponentConnectionStatusNotification;

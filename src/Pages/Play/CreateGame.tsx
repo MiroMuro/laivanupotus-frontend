@@ -39,7 +39,7 @@ const CreateGame = () => {
         setCurrentGame(game);
 
         setIsWebSocketConnecting(true);
-        await connect();
+        await connect(Number(game.id));
         setIsWebSocketConnecting(false);
       } catch (error) {
         if (error instanceof Error) {

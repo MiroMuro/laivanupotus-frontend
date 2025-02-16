@@ -6,12 +6,17 @@ import { Client, StompSubscription } from "@stomp/stompjs";
 import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 
 interface WebSocketContextType extends WebSocketHook {
-  connect: () => void;
+  connect: (gameId: number) => void;
   disconnect: (gameId: number, permanent: boolean) => void;
   disconnectFromCreateGame: (permanent: boolean) => void;
+  disconnectFromUnload: (gameId: number, permanent: boolean) => void;
   sendPageRefreshMessageThroughWebSocket: (gameId: number) => void;
 }
 
+interface GameBoardProps {
+  gameId: string;
+  playerId: string;
+}
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export const WebSocketProvider = ({
@@ -19,7 +24,7 @@ export const WebSocketProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { token } = useAuth();
+  const { token, currentUserInformation } = useAuth();
   const stompClient = useRef<Client | null>(null);
   const subscriptions = useRef<{
     [key: string]: {
@@ -33,62 +38,87 @@ export const WebSocketProvider = ({
   //Used to determine between a refresh and a permanent disconnect.
   const isPermanentDisconnect = useRef<boolean>(false);
 
-  const connect = useCallback(async () => {
-    if (stompClient.current?.connected) {
-      console.log("Already connected to Stomp client");
-      return;
-    }
-
-    const client = new Client({
-      brokerURL: `${import.meta.env.VITE_BACKEND_BASE_URL}/ws-battleship`,
-      connectHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-      debug: (str) => {
-        console.log(str);
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-    });
-
-    client.onConnect = () => {
-      setConnected(true);
-      console.log("Connected to websocket");
-    };
-
-    client.onStompError = (frame) => {
-      console.error("Broker reported error: " + frame.headers["message"]);
-      console.error("Additional details: " + frame.body);
-    };
-
-    client.onDisconnect = () => {
-      setConnected(false);
-      console.log("Disconnected from websocket");
-    };
-
-    client.onWebSocketClose = () => {
-      //Attempt to reconnect after a brief delay
-      if (!isPermanentDisconnect.current) {
-        setConnected(false);
-        console.log("Disconnected from websocket in onWebSocketClose");
-        setTimeout(() => {
-          if (!client.connected) {
-            console.log("Attempting to reconnect to websocket");
-            client.activate();
-          }
-        }, 5000);
+  const connect = useCallback(
+    async (gameId: number) => {
+      if (stompClient.current?.connected) {
+        console.log("Already connected to Stomp client");
+        return;
       }
-    };
-    client.activate();
-    stompClient.current = client;
-  }, [token]);
+
+      const client = new Client({
+        brokerURL: `${import.meta.env.VITE_BACKEND_BASE_URL}/ws-battleship`,
+        connectHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+        debug: (str) => {
+          console.log(str);
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      client.onConnect = () => {
+        setConnected(true);
+        console.log("Connected to websocket");
+        console.log("Current user information", currentUserInformation);
+        stompClient.current?.publish({
+          destination: `/topic/game/${gameId}/opponent-connected`,
+          body: JSON.stringify({
+            message: "Opponent connected",
+            type: "CONNECTED",
+            timestamp: new Date().getTime(),
+            path: "/play",
+          }),
+        });
+      };
+
+      client.onStompError = (frame) => {
+        console.error("Broker reported error: " + frame.headers["message"]);
+        console.error("Additional details: " + frame.body);
+      };
+
+      client.onDisconnect = () => {
+        setConnected(false);
+        console.log("Disconnected from websocket");
+      };
+
+      client.onWebSocketClose = () => {
+        //Attempt to reconnect after a brief delay
+        if (!isPermanentDisconnect.current) {
+          setConnected(false);
+          console.log("Disconnected from websocket in onWebSocketClose");
+          setTimeout(() => {
+            if (!client.connected) {
+              console.log("Attempting to reconnect to websocket");
+              client.activate();
+            }
+          }, 5000);
+        }
+      };
+      client.activate();
+      stompClient.current = client;
+    },
+    [token]
+  );
 
   const disconnect = (gameId: number, permanent: boolean) => {
     console.log("Disconnecting from websocket");
     isPermanentDisconnect.current = permanent;
     if (StompClientCurrentExists()) {
-      sendDisconnectionMessageThroughWebSocket(gameId, "/play");
+      //sendDisconnectionMessageThroughWebSocket(gameId, "/play");
+      unsubscribeStompClientFromAllEvents();
+      shutDownStompClient();
+    } else {
+      console.log("Stomp client does not exist");
+    }
+  };
+
+  const disconnectFromUnload = (gameId: number, permanent: boolean) => {
+    console.log("Disconnecting from websocket");
+    isPermanentDisconnect.current = permanent;
+    if (StompClientCurrentExists()) {
+      sendUnloadDisconnectionMessageThroughWebSocket(gameId, "/play");
       unsubscribeStompClientFromAllEvents();
       shutDownStompClient();
     } else {
@@ -107,6 +137,21 @@ export const WebSocketProvider = ({
   };
   const StompClientCurrentExists = () => {
     return stompClient.current;
+  };
+
+  const sendUnloadDisconnectionMessageThroughWebSocket = (
+    gameId: number,
+    pathName: string
+  ) => {
+    stompClient.current?.publish({
+      destination: `/topic/game/${gameId}/opponent-disconnected`,
+      body: JSON.stringify({
+        message: "Opponent disconnected due to navigation",
+        type: "LEAVE",
+        timestamp: new Date().getTime(),
+        path: pathName,
+      }),
+    });
   };
 
   const sendDisconnectionMessageThroughWebSocket = (
@@ -128,8 +173,8 @@ export const WebSocketProvider = ({
     stompClient.current?.publish({
       destination: `/topic/game/${gameId}/opponent-disconnected`,
       body: JSON.stringify({
-        message: "Opponent reconnecting",
-        type: "REFRESH",
+        message: "Opponent intends to reconnect",
+        type: "REFRESH_INTENT",
         timestamp: new Date().getTime(),
       }),
     });
@@ -218,6 +263,7 @@ export const WebSocketProvider = ({
         connect,
         disconnect,
         disconnectFromCreateGame,
+        disconnectFromUnload,
         sendPageRefreshMessageThroughWebSocket,
       }}
     >

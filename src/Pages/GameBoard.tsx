@@ -1,6 +1,7 @@
 import Grid from "../Components/Grid/Grid";
 import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import ConnectionStatusNotification from "../Components/Grid/ConnectionStatusNotification";
+import OpponentConnectionStatusNotification from "../Components/Grid/OpponentConnectionStatusNotification";
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
@@ -38,17 +39,13 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [infoMessage, setInfoMessage] = useState<string>(
     `Drag your all of your ships to your board, and then press "Confirm ships"`
   );
+  const [opponentConnectionMessage, setOpponentConnectionMessage] =
+    useState<string>("");
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-  const {
-    disconnect,
-    subscribeToGameEvent,
-    connected,
-    connect,
-    sendPageRefreshMessageThroughWebSocket,
-  } = context;
+  const { disconnect, subscribeToGameEvent, connected, connect } = context;
   const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
   const {
     getShipStartingCellCoords,
@@ -91,6 +88,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       const handleOpponentDisconnected = (data: any) => {
         setInfoMessage("Opponent disconnected");
         console.log("Opponent disconnected", data);
+        setOpponentConnectionMessage(data.message);
       };
 
       const gameSub = subscribeToGameEvent(
@@ -111,32 +109,26 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     };
 
     if (!connected) {
-      connect();
+      connect(Number(gameId), Number(playerId));
     } else {
       setupSubscriptions();
     }
 
     return () => {
       //console.log("LEAVING OR REFRESHING PAGE");
+
+      // window.removeEventListener("beforeunload", handleBeforeUnload);
+
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
-      // Only disconnect permanently if the navigating away from the page
+      // // Only disconnect permanently if the navigating away from the page
       if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
-        const data = JSON.stringify({
-          message: "Opponent left the game",
-          type: "LEAVE",
-          timestamp: new Date().getTime(),
-        });
-
-        const blob = new Blob([data], { type: "application/json" });
-
-        navigator.sendBeacon(`/api/game/${gameId}/leave`, blob);
-
         disconnect(Number(gameId), true);
         console.log("Leaving page");
       } else {
         console.log("Refreshing page");
       }
     };
+    //Disconnect from the game when the component unmounts
   }, [connected, gameId, playerId, connect, disconnect, subscribeToGameEvent]);
 
   let updateShotsAtYourBoard = (move: Move) => {
@@ -168,11 +160,11 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponenstShotsAtYourBoard]);
 
-  useBeforeUnload((e) => {
-    if (connected) {
-      sendPageRefreshMessageThroughWebSocket(Number(gameId));
-    }
-  });
+  // useBeforeUnload((e) => {
+  //   if (connected) {
+  //     sendPageRefreshMessageThroughWebSocket(Number(gameId));
+  //   }
+  // });
 
   useEffect(() => {
     // const handleUnload = () =>{
@@ -358,6 +350,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <ConnectionStatusNotification />
+      <OpponentConnectionStatusNotification
+        message={opponentConnectionMessage}
+      />
       <header className="w-full flex flex-row justify-around text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
         <p className="flex-[1_1_0%] text-xl">

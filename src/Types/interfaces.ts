@@ -177,3 +177,11 @@ export type playerJoinedData = {
   message: string;
   messageStatus: boolean;
 };
+
+export type DisconnectMessage = {
+  type: String;
+  path: String;
+  timestamp: number;
+  message: String;
+  playerId: number;
+};
