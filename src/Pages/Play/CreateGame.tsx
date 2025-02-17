@@ -98,7 +98,9 @@ const CreateGame = () => {
     }
     return () => {
       // Only disconnect permanently if the navigating away from the page
-      if (window.location.pathname !== `/play/create`) {
+      console.log("Location pathname", window.location.pathname);
+      if (userIsNavigatingAway()) {
+        console.log("SWAG");
         if (currentGame?.id && connected) {
           disconnectFromCreateGame(true);
           console.log("Disconnecting permanently. Shutting down stomp client");
@@ -123,6 +125,12 @@ const CreateGame = () => {
     }
   };
 
+  const userIsNavigatingAway = () => {
+    return (
+      window.location.pathname !== `/play/create` &&
+      window.location.pathname !== `/play/game/${currentGame?.id}/${playerId}`
+    );
+  };
   console.log("CurrentGame", currentGame);
   return (
     <div className="h-1/3 w-1/4 border-4 flex flex-col justify-center relative items-center text-2xl border-gray-400 bg-battleship-blue-light text-white rounded-xl">

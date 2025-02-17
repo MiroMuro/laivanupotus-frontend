@@ -32,6 +32,7 @@ export const WebSocketProvider = ({
       playerJoined: StompSubscription;
       opponentDisconnected: StompSubscription;
       move: StompSubscription;
+      connectionEvent: StompSubscription;
     };
   }>({});
   const [connected, setConnected] = useState<boolean>(false);
@@ -130,7 +131,6 @@ export const WebSocketProvider = ({
     isPermanentDisconnect.current = permanent;
     if (StompClientCurrentExists()) {
       unsubscribeStompClientFromAllEvents();
-      shutDownStompClient();
     } else {
       console.log("Stomp client does not exist");
     }
@@ -148,21 +148,6 @@ export const WebSocketProvider = ({
       body: JSON.stringify({
         message: "Opponent disconnected due to navigation",
         type: "LEAVE",
-        timestamp: new Date().getTime(),
-        path: pathName,
-      }),
-    });
-  };
-
-  const sendDisconnectionMessageThroughWebSocket = (
-    gameId: number,
-    pathName: string
-  ) => {
-    stompClient.current?.publish({
-      destination: `/topic/game/${gameId}/opponent-disconnected`,
-      body: JSON.stringify({
-        message: "Opponent disconnected due to navigation",
-        type: "NAVIGATION",
         timestamp: new Date().getTime(),
         path: pathName,
       }),
@@ -205,6 +190,7 @@ export const WebSocketProvider = ({
       playerJoined: `/topic/game/${gameId}/player-joined`,
       opponentDisconnected: `/topic/game/${gameId}/opponent-disconnected`,
       move: `/topic/game/${gameId}/move`,
+      connectionEvent: `/topic/game/connections`,
     };
 
     const subscription = stompClient.current.subscribe(
@@ -221,6 +207,7 @@ export const WebSocketProvider = ({
         playerJoined: null as unknown as StompSubscription,
         opponentDisconnected: null as unknown as StompSubscription,
         move: null as unknown as StompSubscription,
+        connectionEvent: null as unknown as StompSubscription,
       };
     }
 

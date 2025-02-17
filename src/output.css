@@ -774,10 +774,6 @@ video {
   display: grid;
 }
 
-.hidden{
-  display: none;
-}
-
 .h-1\/2{
   height: 50%;
 }

@@ -91,6 +91,10 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         setOpponentConnectionMessage(data.message);
       };
 
+      const handleConnectionEvent = (data: any) => {
+        console.log("In connection EVENT");
+        console.log("Connection event data: ", data);
+      };
       const gameSub = subscribeToGameEvent(
         Number(gameId),
         "game",
@@ -102,14 +106,22 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         "opponentDisconnected",
         handleOpponentDisconnected
       );
+
+      const connectionEventSub = subscribeToGameEvent(
+        Number(gameId),
+        "connectionEvent",
+        handleConnectionEvent
+      );
+
       if (gameSub) activeSubScriptions.push(gameSub);
       if (moveSub) activeSubScriptions.push(moveSub);
       if (opponentDisconnectedSub)
         activeSubScriptions.push(opponentDisconnectedSub);
+      if (connectionEventSub) activeSubScriptions.push(connectionEventSub);
     };
 
     if (!connected) {
-      connect(Number(gameId), Number(playerId));
+      connect(Number(gameId));
     } else {
       setupSubscriptions();
     }

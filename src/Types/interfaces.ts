@@ -150,7 +150,8 @@ export type SubscriptionType =
   | "game"
   | "playerJoined"
   | "move"
-  | "opponentDisconnected";
+  | "opponentDisconnected"
+  | "connectionEvent";
 export type SubscriptionCallback = (data: any) => void;
 
 export interface gameSubscriptions {
