@@ -85,9 +85,9 @@ const CreateGame = () => {
     console.log("Connected", connected);
     console.log("IsWebSocketConnecting", isWebSocketConnecting);
     if (currentGame?.id && connected && !isWebSocketConnecting) {
-      console.log("Subscribing to playerJoined event");
+      //console.log("Subscribing to playerJoined event");
       subscribeToGameEvent(currentGame.id, "playerJoined", (data) => {
-        console.log("Player joined", data);
+        //console.log("Player joined", data);
 
         if (data.messageStatus === true) {
           delete data.messageStatus;
@@ -98,16 +98,16 @@ const CreateGame = () => {
     }
     return () => {
       // Only disconnect permanently if the navigating away from the page
-      console.log("Location pathname", window.location.pathname);
+      //console.log("Location pathname", window.location.pathname);
       if (userIsNavigatingAway()) {
         console.log("SWAG");
         if (currentGame?.id && connected) {
           disconnectFromCreateGame(true);
-          console.log("Disconnecting permanently. Shutting down stomp client");
+          //console.log("Disconnecting permanently. Shutting down stomp client");
         }
-        console.log("Navigating away from create game page");
+        //console.log("Navigating away from create game page");
       } else {
-        console.log("Refreshing page");
+        //console.log("Refreshing page");
       }
     };
   }, [currentGame?.status, connected, isWebSocketConnecting]);

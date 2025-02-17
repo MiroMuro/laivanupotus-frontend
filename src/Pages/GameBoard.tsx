@@ -14,6 +14,7 @@ import {
   WebSocketMoveResponseDto,
   GameStatus,
 } from "../Types/interfaces";
+import GameBoardButton from "../Components/Grid/GameBoardButton";
 import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
@@ -166,10 +167,10 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   ]);
 
   useEffect(() => {
-    console.log(
-      "Shots updated:",
-      opponenstShotsAtYourBoard.filter((shot) => shot !== null)
-    );
+    // console.log(
+    //   "Shots updated:",
+    //   opponenstShotsAtYourBoard.filter((shot) => shot !== null)
+    // );
   }, [opponenstShotsAtYourBoard]);
 
   // useBeforeUnload((e) => {
@@ -273,11 +274,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     setShips(initialShipsStateArray);
   };
 
-  const confirmShips = async (
-    matchId: string,
-    playerId: string,
-    placedShips: DraggableShip[]
-  ) => {
+  const confirmShips = async () => {
     if (!shipsVerified()) {
       return;
     }
@@ -287,7 +284,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       id: ship.id.slice(-1),
     }));
     let success = await placeShips(
-      Number(matchId),
+      Number(gameId),
       Number(playerId),
       shipsWithLongId
     );
@@ -395,60 +392,23 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       </div>
       <footer className="w-full h-1/6 flex justify-around text-center">
         <div className="flex-[1_1_0%] flex justify-around items-center text-xl gap-8">
-          <div
-            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4 ${
-              shipsPlaced
-                ? ""
-                : "transition transform hover:scale-105 active:scale-75"
-            }`}
-          >
-            <button
-              className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
-                shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
-              }`}
-              onClick={() => resetShips()}
-            >
-              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
-                Reset ships
-              </p>
-            </button>
-          </div>
-
-          <div
-            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4  ${
-              shipsPlaced
-                ? ""
-                : "transition transform hover:scale-105 active:scale-75"
-            }`}
-          >
-            <button
-              className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative ${
-                shipsPlaced ? "cursor-not-allowed disabled" : "cursor-pointer"
-              }`}
-              onClick={() => confirmShips(gameId, playerId, placedShips)}
-            >
-              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
-                Confirm ships
-              </p>
-            </button>
-          </div>
-
-          <div
-            className={`bg-battleship-blue-light flex flex-col justify-end border-2 border-gray-400 rounded-xl h-5/6 w-1/4  ${
-              shipsPlaced
-                ? ""
-                : "transition transform hover:scale-105 active:scale-75"
-            }`}
-          >
-            <button
-              className="w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative 
-                cursor-pointer"
-            >
-              <p className="text-lg text-white absolute -top-3 left-1/2 -translate-x-1/2">
-                Connect to chat
-              </p>
-            </button>
-          </div>
+          <GameBoardButton
+            shipsPlaced={shipsPlaced}
+            label="Reset ships"
+            onButtonClick={resetShips}
+          />
+          <GameBoardButton
+            shipsPlaced={shipsPlaced}
+            label="Confirm ships"
+            onButtonClick={confirmShips}
+          />
+          <GameBoardButton
+            shipsPlaced={false}
+            label="Connect to chat"
+            onButtonClick={() => {
+              console.log("Chat opened");
+            }}
+          />
         </div>
         <div className="flex-[2_1_0%] flex bg-white justify-center items-center text-xl gap-8"></div>
       </footer>

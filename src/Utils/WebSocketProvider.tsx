@@ -42,7 +42,7 @@ export const WebSocketProvider = ({
   const connect = useCallback(
     async (gameId: number) => {
       if (stompClient.current?.connected) {
-        console.log("Already connected to Stomp client");
+        //console.log("Already connected to Stomp client");
         return;
       }
 
@@ -61,8 +61,8 @@ export const WebSocketProvider = ({
 
       client.onConnect = () => {
         setConnected(true);
-        console.log("Connected to websocket");
-        console.log("Current user information", currentUserInformation);
+        //console.log("Connected to websocket");
+        //console.log("Current user information", currentUserInformation);
         stompClient.current?.publish({
           destination: `/topic/game/${gameId}/opponent-connected`,
           body: JSON.stringify({
@@ -81,17 +81,17 @@ export const WebSocketProvider = ({
 
       client.onDisconnect = () => {
         setConnected(false);
-        console.log("Disconnected from websocket");
+        // console.log("Disconnected from websocket");
       };
 
       client.onWebSocketClose = () => {
         //Attempt to reconnect after a brief delay
         if (!isPermanentDisconnect.current) {
           setConnected(false);
-          console.log("Disconnected from websocket in onWebSocketClose");
+          //console.log("Disconnected from websocket in onWebSocketClose");
           setTimeout(() => {
             if (!client.connected) {
-              console.log("Attempting to reconnect to websocket");
+              // console.log("Attempting to reconnect to websocket");
               client.activate();
             }
           }, 5000);
@@ -104,26 +104,26 @@ export const WebSocketProvider = ({
   );
 
   const disconnect = (gameId: number, permanent: boolean) => {
-    console.log("Disconnecting from websocket");
+    //console.log("Disconnecting from websocket");
     isPermanentDisconnect.current = permanent;
     if (StompClientCurrentExists()) {
       //sendDisconnectionMessageThroughWebSocket(gameId, "/play");
       unsubscribeStompClientFromAllEvents();
       shutDownStompClient();
     } else {
-      console.log("Stomp client does not exist");
+      //console.log("Stomp client does not exist");
     }
   };
 
   const disconnectFromUnload = (gameId: number, permanent: boolean) => {
-    console.log("Disconnecting from websocket");
+    //console.log("Disconnecting from websocket");
     isPermanentDisconnect.current = permanent;
     if (StompClientCurrentExists()) {
       sendUnloadDisconnectionMessageThroughWebSocket(gameId, "/play");
       unsubscribeStompClientFromAllEvents();
       shutDownStompClient();
     } else {
-      console.log("Stomp client does not exist");
+      //console.log("Stomp client does not exist");
     }
   };
 
