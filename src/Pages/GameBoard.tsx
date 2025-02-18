@@ -12,23 +12,21 @@ import {
   matchStatus,
   Move,
   WebSocketMoveResponseDto,
-  GameStatus,
+  ConnectionEvent,
 } from "../Types/interfaces";
 import GameBoardButton from "../Components/Grid/GameBoardButton";
 import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
 import useGame from "../Utils/useGame";
-import { useLocation, useBeforeUnload } from "react-router";
 interface GameBoardProps {
   gameId: string;
   playerId: string;
 }
 
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
-  const location = useLocation();
   const context = useWebSocket();
-  const { placeShips, makeMove, getGameState } = useGame();
+  const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
@@ -41,7 +39,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     `Drag your all of your ships to your board, and then press "Confirm ships"`
   );
   const [opponentConnectionMessage, setOpponentConnectionMessage] =
-    useState<string>("");
+    useState<ConnectionEvent>();
   const [isYourTurn, setIsYourTurn] = useState<boolean>(false);
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
@@ -86,15 +84,10 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         setIsYourTurn(isCurrentPlayerTurn);
       };
 
-      const handleOpponentDisconnected = (data: any) => {
-        setInfoMessage("Opponent disconnected");
-        console.log("Opponent disconnected", data);
-        setOpponentConnectionMessage(data.message);
-      };
-
-      const handleConnectionEvent = (data: any) => {
+      const handleConnectionEvent = (data: ConnectionEvent) => {
         console.log("In connection EVENT");
         console.log("Connection event data: ", data);
+        setOpponentConnectionMessage(data);
       };
       const gameSub = subscribeToGameEvent(
         Number(gameId),
@@ -102,11 +95,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         handleGameEvent
       );
       const moveSub = subscribeToGameEvent(Number(gameId), "move", handleMove);
-      const opponentDisconnectedSub = subscribeToGameEvent(
-        Number(gameId),
-        "opponentDisconnected",
-        handleOpponentDisconnected
-      );
 
       const connectionEventSub = subscribeToGameEvent(
         Number(gameId),
@@ -116,8 +104,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
       if (gameSub) activeSubScriptions.push(gameSub);
       if (moveSub) activeSubScriptions.push(moveSub);
-      if (opponentDisconnectedSub)
-        activeSubScriptions.push(opponentDisconnectedSub);
       if (connectionEventSub) activeSubScriptions.push(connectionEventSub);
     };
 
@@ -129,8 +115,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
     return () => {
       //console.log("LEAVING OR REFRESHING PAGE");
-
-      // window.removeEventListener("beforeunload", handleBeforeUnload);
 
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
       // // Only disconnect permanently if the navigating away from the page
@@ -167,62 +151,13 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   ]);
 
   useEffect(() => {
-    // console.log(
-    //   "Shots updated:",
-    //   opponenstShotsAtYourBoard.filter((shot) => shot !== null)
-    // );
+    console.log(
+      "Shots updated:",
+      opponenstShotsAtYourBoard.filter((shot) => shot !== null)
+    );
   }, [opponenstShotsAtYourBoard]);
 
-  // useBeforeUnload((e) => {
-  //   if (connected) {
-  //     sendPageRefreshMessageThroughWebSocket(Number(gameId));
-  //   }
-  // });
-
-  useEffect(() => {
-    // const handleUnload = () =>{
-    //   if(connected){
-    //     const data = JSON.stringify({
-    //       type: "LEAVE",
-    //       timestamp: new Date().toISOString()
-    //     });
-    //     const blob = new Blob([data], {type: "application/json"});
-    //     navigator.sendBeacon(`/api/game/${gameId}/leave`, blob);
-    //   }
-    // };
-    // window.addEventListener("unload", handleUnload);
-    // return () => window.removeEventListener("unload", handleUnload);
-  }, [connected, gameId]);
-  // useEffect(() => {
-  //   const onBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     console.log("Im in onBeforeUnload");
-
-  //     e.preventDefault();
-
-  //     return "Are you sure you want to leave?";
-  //   };
-
-  //   window.addEventListener("beforeunload", onBeforeUnload);
-
-  //   async function fetchData(
-  //     matchId: number,
-  //     playerId: number,
-  //     gameStatus: GameStatus
-  //   ) {
-  //     const response = await getGameState(
-  //       Number(matchId),
-  //       Number(playerId),
-  //       gameStatus
-  //     );
-  //     console.log("THe response of the game state is:", response);
-  //   }
-
-  //   fetchData(Number(gameId), Number(playerId), "PLACING_SHIPS");
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", onBeforeUnload);
-  //   };
-  // }, []);
+  useEffect(() => {}, [connected, gameId]);
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -267,7 +202,9 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
 
   const resetShips = () => {
     if (shipsPlaced) {
+      let prevInfoMessage = infoMessage;
       setInfoMessage("You can't reset ships after placing them");
+      setTimeout(() => setInfoMessage(prevInfoMessage), 6000);
       return;
     }
     setPlacedShips([]);
@@ -359,9 +296,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <ConnectionStatusNotification />
-      <OpponentConnectionStatusNotification
-        message={opponentConnectionMessage}
-      />
+      <OpponentConnectionStatusNotification data={opponentConnectionMessage} />
       <header className="w-full flex flex-row justify-around text-center">
         <p className="flex-[1_1_0%] text-xl">{infoMessage}</p>
         <p className="flex-[1_1_0%] text-xl">

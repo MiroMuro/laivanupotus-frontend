@@ -1,33 +1,37 @@
 import { useState, useEffect } from "react";
+import { ConnectionEvent } from "../../Types/interfaces";
 const OpponentConnectionStatusNotification = ({
-  message,
+  data,
 }: {
-  message: string;
+  data: ConnectionEvent | undefined;
 }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [shouldShow, setShouldShow] = useState(true);
-  console.log("THIS IS THE MESSAGE IN OPPONENT CONNECTIONSTAUS", message);
-  useEffect(() => {
-    const initialTimer = setTimeout(() => {
-      setIsVisible(false);
-    }, 5000);
-
-    return () => clearTimeout(initialTimer);
-  }, []);
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldShow, setShouldShow] = useState(false);
+  const [messageToShow, setMessageToShow] = useState("");
+  //Data tulee tietokannasta.
 
   useEffect(() => {
-    if (!message) {
-      setShouldShow(true);
+    if (data) {
       setIsVisible(true);
+      setShouldShow(true);
+      setMessageToShow(data.message);
+
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setShouldShow(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
     }
-  }, [message]);
+  }, [data, setIsVisible]);
 
   if (!shouldShow) return null;
+  //const { status, playerUserName, playerId, message } = data;
 
   return (
     <div
-      className={`opponent-connection-status-slider bg-battleship-blue-light ${
-        isVisible ? "slide-in" : "slide-out"
+      className={`opponent-connection-status-slider flex min-h-10 min-w-52 bg-battleship-blue-light ${
+        isVisible ? `slide-in` : `slide-out`
       }`}
       onAnimationEnd={() => {
         if (!isVisible) {
@@ -35,9 +39,7 @@ const OpponentConnectionStatusNotification = ({
         }
       }}
     >
-      {message
-        ? `Connected ${message}`
-        : `Disconnected. Reconnecting... ${message}`}
+      {messageToShow}
     </div>
   );
 };

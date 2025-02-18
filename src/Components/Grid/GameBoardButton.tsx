@@ -1,6 +1,3 @@
-import { MouseEventHandler } from "react";
-import { DraggableShip } from "../../Types/interfaces";
-
 interface GameBoardButtonProps {
   shipsPlaced: boolean;
   onButtonClick: () => void;

@@ -186,3 +186,17 @@ export type DisconnectMessage = {
   message: String;
   playerId: number;
 };
+
+export enum ConnectionStatus {
+  CONNECTED = "CONNECTED",
+  DISCONNECTED = "DISCONNECTED",
+  RECONNECTING = "RECONNECTING",
+  TIMED_OUT = "TIMED_OUT",
+}
+
+export interface ConnectionEvent {
+  playerUserName: string;
+  playerId: number;
+  status: ConnectionStatus;
+  message: string;
+}

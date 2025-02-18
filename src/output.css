@@ -63,8 +63,6 @@
 }
 
 .opponent-connection-status-slider {
-  height: 40px;
-  width: 200px;
   x: 0;
   font-size: x-large;
   top: 170px;
@@ -695,6 +693,10 @@ video {
   left: 6rem;
 }
 
+.right-0{
+  right: 0px;
+}
+
 .top-0{
   top: 0px;
 }
@@ -717,6 +719,10 @@ video {
 
 .z-30{
   z-index: 30;
+}
+
+.m-2{
+  margin: 0.5rem;
 }
 
 .mx-2{
@@ -754,8 +760,16 @@ video {
   margin-bottom: auto;
 }
 
+.-ml-1{
+  margin-left: -0.25rem;
+}
+
 .ml-2{
   margin-left: 0.5rem;
+}
+
+.mr-3{
+  margin-right: 0.75rem;
 }
 
 .block{
@@ -772,6 +786,11 @@ video {
 
 .grid{
   display: grid;
+}
+
+.size-5{
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .h-1\/2{
@@ -862,6 +881,10 @@ video {
   max-height: 5rem;
 }
 
+.min-h-10{
+  min-height: 2.5rem;
+}
+
 .min-h-11{
   min-height: 2.75rem;
 }
@@ -884,6 +907,10 @@ video {
 
 .w-12{
   width: 3rem;
+}
+
+.w-14{
+  width: 3.5rem;
 }
 
 .w-16{
@@ -920,6 +947,10 @@ video {
 
 .w-full{
   width: 100%;
+}
+
+.min-w-52{
+  min-width: 13rem;
 }
 
 .flex-1{
@@ -981,6 +1012,16 @@ video {
 
 .animate-error-message-fade{
   animation: fadeInAndOut 10s linear forwards;
+}
+
+@keyframes spin{
+  to{
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin{
+  animation: spin 1s linear infinite;
 }
 
 .cursor-not-allowed{
@@ -1293,6 +1334,14 @@ video {
 
 .opacity-100{
   opacity: 1;
+}
+
+.opacity-25{
+  opacity: 0.25;
+}
+
+.opacity-75{
+  opacity: 0.75;
 }
 
 .shadow-2xl{
