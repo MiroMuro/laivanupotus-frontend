@@ -32,7 +32,7 @@ const JoinGame = () => {
       <h1 className="text-3xl border-b-4 border-gray-400 text-center w-full py-4">
         Available games
       </h1>
-      {!games.length && <p>No games available</p>}
+      {games.length <= 0 && <p>No games available</p>}
       {games.length > 0 && (
         <table className="w-full">
           <tbody>

@@ -200,3 +200,10 @@ export interface ConnectionEvent {
   status: ConnectionStatus;
   message: string;
 }
+
+export interface ErrorResponse {
+  message: string;
+  error: string;
+  status: number;
+  timestamp: string;
+}

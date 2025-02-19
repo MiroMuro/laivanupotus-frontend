@@ -17,6 +17,7 @@ const useGame = () => {
   const [leaderboardUsers, setLeaderboardUsers] = useState<NotOwnUserProfile[]>(
     []
   );
+
   const fetchGames = async () => {
     try {
       const response = await fetch(
@@ -58,6 +59,7 @@ const useGame = () => {
   const createGame = async (playerId: number) => {
     setCreatingGameLoading(true);
     try {
+      //This is codethat might throw an Error.
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), 20000);
 
@@ -67,22 +69,56 @@ const useGame = () => {
         }/api/game/create?userId=${playerId}`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
           signal: abortController.signal,
         }
       );
       clearTimeout(timeoutId);
 
+      //Detects an HTTP error.
       if (!response.ok) {
-        throw new Error("Failed to create a game! Status: " + response.status);
+        const errorData = await response.json().catch(() => null);
+
+        switch (response.status) {
+          case 409:
+            throw new Error(
+              errorData?.message ||
+                "You are already in an active match! You cannot play multiple matches at once!"
+            );
+          case 404:
+            throw new Error(
+              errorData?.message || `User with id ${playerId} not found!`
+            );
+          case 403:
+            throw new Error(
+              errorData?.message || "You are not authorized to create a game!"
+            );
+          case 401:
+            throw new Error(
+              errorData?.message || "Unauthorized! Please login and try again!"
+            );
+          case 500:
+            throw new Error(
+              errorData?.message ||
+                "Internal server error! Please try again later!"
+            );
+          default:
+            throw new Error(
+              errorData?.message ||
+                `Failed to create game: ${response.statusText}`
+            );
+        }
       }
       let game = await response.json();
       //setCurrentGame(game);
       return game;
     } catch (error: unknown) {
+      //If an error is detected in the try block the execution stops immediately and the catch block is executed.
       if (error instanceof Error) {
+        //When we throw an Error from the catch block it basically means:
+        //Lets not handle the Error here, but instead upper in the hiearchy.
         setCreatingGameLoading(false);
         if (error.name === "AbortError") {
           console.error("Failed to create a game: Timeout");
@@ -94,10 +130,12 @@ const useGame = () => {
           throw new Error(
             "Game server is currently unavailable. Please try again in a few moments."
           );
+        } else {
+          console.error(error);
+          throw error;
         }
-        console.error(error);
-        throw error;
       }
+      throw new Error("An unexpected error occurred! Please try again later!");
     } finally {
       setCreatingGameLoading(false);
     }
@@ -106,6 +144,9 @@ const useGame = () => {
   const joinGame = async (matchId: number, playerId: number) => {
     setJoiningGameLoading(true);
     try {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 20000);
+
       const response = await fetch(
         `${
           import.meta.env.VITE_BACKEND_BASE_URL
@@ -117,10 +158,29 @@ const useGame = () => {
           },
         }
       );
-      setJoiningGameLoading(false);
-      let activeGame = await response.json();
-      setCurrentGame(activeGame);
-    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error("Failed to join the game! Status: " + response.status);
+        throw new Error("Failed to join the game!");
+      }
+      let game = await response.json();
+      setCurrentGame(game);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setJoiningGameLoading(false);
+        if (error.name === "AbortError") {
+          console.error("Failed to join the game: Timeout");
+          throw new Error("Failed to join the game: Request timed out!");
+        } else if (
+          error.name === "TypeError" &&
+          error.message.includes("NetworkError")
+        ) {
+          throw new Error(
+            "Game server is currently unavailable. Please try again in a few moments."
+          );
+        }
+      }
       console.error(error);
     }
   };

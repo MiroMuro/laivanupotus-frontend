@@ -20,42 +20,43 @@ const Leaderboards = () => {
       {leaderboardUsers.length === 0 && <p>No players found</p>}
       {leaderboardUsers.length > 0 && (
         <table className="w-full">
-          {" "}
-          <tr className="w-full text-xl bg-battleship-blue-dark border-b-4 border-gray-400">
-            <th>
-              Username <button>⇅</button>
-            </th>
-            <th>
-              Wins <button>⇅</button>
-            </th>
-            <th>
-              Losses <button>⇅</button>
-            </th>
-            <th>
-              Winrate <button>⇅</button>
-            </th>
-            <th>Last online</th>
-          </tr>
-          {leaderboardUsers.map((user: NotOwnUserProfile) => (
-            <tr className="w-full text-xl odd:bg-battleship-blue">
-              <th>{user.userName}</th>
-              <th>{user.gamesWon}</th>
-              <th>{user.gamesLost}</th>
+          <tbody>
+            <tr className="w-full text-xl bg-battleship-blue-dark border-b-4 border-gray-400">
               <th>
-                {isNaN(user.gamesWon / (user.gamesLost + user.gamesWon))
-                  ? 0
-                  : Math.floor(
-                      user.gamesWon / (user.gamesLost + user.gamesWon)
-                    )}
-                %
+                Username <button>⇅</button>
               </th>
               <th>
-                {user.lastLogin
-                  ? convertIsoDateToTime(user.lastLogin)
-                  : "Never played"}
+                Wins <button>⇅</button>
               </th>
+              <th>
+                Losses <button>⇅</button>
+              </th>
+              <th>
+                Winrate <button>⇅</button>
+              </th>
+              <th>Last online</th>
             </tr>
-          ))}
+            {leaderboardUsers.map((user: NotOwnUserProfile) => (
+              <tr className="w-full text-xl odd:bg-battleship-blue">
+                <th>{user.userName}</th>
+                <th>{user.gamesWon}</th>
+                <th>{user.gamesLost}</th>
+                <th>
+                  {isNaN(user.gamesWon / (user.gamesLost + user.gamesWon))
+                    ? 0
+                    : Math.floor(
+                        user.gamesWon / (user.gamesLost + user.gamesWon)
+                      )}
+                  %
+                </th>
+                <th>
+                  {user.lastLogin
+                    ? convertIsoDateToTime(user.lastLogin)
+                    : "Never played"}
+                </th>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
     </div>

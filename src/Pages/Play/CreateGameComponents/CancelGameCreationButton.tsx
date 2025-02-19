@@ -1,4 +1,4 @@
-const CancelMatchCreationButton = ({
+const CancelGameCreationButton = ({
   cancelMatchCreation,
 }: {
   cancelMatchCreation: () => void;
@@ -15,4 +15,4 @@ const CancelMatchCreationButton = ({
   );
 };
 
-export default CancelMatchCreationButton;
+export default CancelGameCreationButton;

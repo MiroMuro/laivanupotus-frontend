@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import useGame from "../../Utils/useGame";
 import { useWebSocket } from "../../Utils/WebSocketProvider";
-import { CurrentGame } from "../../Types/interfaces";
 import ErrorLabel from "./CreateGameComponents/ErrorLabel";
 import InfoLabel from "./CreateGameComponents/InfoLabel";
 import CancelGameCreationButton from "./CreateGameComponents/CancelGameCreationButton";
@@ -28,12 +27,7 @@ const CreateGame = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [isWebSocketConnecting, setIsWebSocketConnecting] = useState(false);
-  const [matchCreated, setMatchCreated] = useState(
-    !!currentGame && currentGame.status === "WAITING_FOR_PLAYER"
-  );
-  const [opponentFound, setOpponentFound] = useState(
-    !!currentGame && currentGame.status === "PLACING_SHIPS"
-  );
+
   if (!playerId) {
     return <div>Couldn't fetch player Id, please login and try again.</div>;
   }
@@ -133,7 +127,7 @@ const CreateGame = () => {
       setTimeout(() => {
         unsubscribeFromSingleGameEvent(currentGame.id, "playerJoined");
         navigate("/play/game/" + currentGame.id + "/" + playerId);
-      }, 60000);
+      }, 2000);
     }
   };
 

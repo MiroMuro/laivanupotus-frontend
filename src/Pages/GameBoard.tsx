@@ -19,13 +19,16 @@ import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
 import useGame from "../Utils/useGame";
+import { useRef } from "react";
 interface GameBoardProps {
   gameId: string;
   playerId: string;
 }
 
 const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
+  const userHasRefreshedPage = useRef(false);
   const context = useWebSocket();
+  const { disconnect, subscribeToGameEvent, connected, connect } = context;
   const { placeShips, makeMove } = useGame();
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
@@ -44,7 +47,7 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-  const { disconnect, subscribeToGameEvent, connected, connect } = context;
+
   const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
   const {
     getShipStartingCellCoords,
@@ -113,9 +116,17 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
       setupSubscriptions();
     }
 
+    if (userHasRefreshedPage.current) {
+      //Implement gamestate fetch function.
+      console.log("THe user has refreshed the page.");
+    }
+    if (!userHasRefreshedPage.current) {
+      console.log("The user has not refreshed the page.");
+    }
+
     return () => {
       //console.log("LEAVING OR REFRESHING PAGE");
-
+      userHasRefreshedPage.current = true;
       activeSubScriptions.forEach((sub) => sub.unsubscribe());
       // // Only disconnect permanently if the navigating away from the page
       if (window.location.pathname !== `/play/game/${gameId}/${playerId}`) {
