@@ -5,6 +5,7 @@ import OpponentConnectionStatusNotification from "../Components/Grid/OpponentCon
 import Ships from "../Components/Grid/Ships";
 import useShip from "../Utils/UseShip";
 import { closestCorners, DndContext } from "@dnd-kit/core";
+import GameArea from "../Components/GameArea";
 import {
   Ship,
   DraggableShip,
@@ -13,6 +14,8 @@ import {
   Move,
   WebSocketMoveResponseDto,
   ConnectionEvent,
+  GameStatus,
+  ConnectionStatus,
 } from "../Types/interfaces";
 import GameBoardButton from "../Components/Grid/GameBoardButton";
 import { useEffect, useState } from "react";
@@ -25,16 +28,22 @@ interface GameBoardProps {
   playerId: string;
 }
 
-const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
+const Game = ({ gameId, playerId }: GameBoardProps) => {
   const userHasRefreshedPage = useRef(false);
   const context = useWebSocket();
+  //Only used by Game.
   const { disconnect, subscribeToGameEvent, connected, connect } = context;
-  const { placeShips, makeMove } = useGame();
+  const { placeShips, getGameStateByUserIdAndMatchId } = useGame();
+  //Used by footer and GameArea
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
+  const [gameStatePlaceholder, setGameStatePlaceholder] = useState();
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
   );
-  const [opponenstShotsAtYourBoard, setOpponentShotsAtYourBoard] = useState<
+  //Can probabaly be moved to GameArea.
+
+  //This stays.
+  const [opponentsShotsAtYourBoard, setOpponentShotsAtYourBoard] = useState<
     Move[]
   >(Array(100).fill(null));
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
@@ -47,13 +56,8 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-
+  //Footer and GameArea both use this
   const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
-  const {
-    getShipStartingCellCoords,
-    getShipCoords,
-    doesShipCollideWithPlacedShips,
-  } = useShip();
 
   useEffect(() => {
     const activeSubScriptions: { unsubscribe: () => void }[] = [];
@@ -115,8 +119,20 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     } else {
       setupSubscriptions();
     }
-
+    const fetchGameState = async (matchId: number, playerId: number) => {
+      try {
+        const gameState = await getGameStateByUserIdAndMatchId(
+          matchId,
+          playerId
+        );
+        setGameStatePlaceholder(gameState);
+      } catch (error) {
+        console.error("Failed to get game state:", error);
+        throw new Error("Failed to get game state");
+      }
+    };
     if (userHasRefreshedPage.current) {
+      fetchGameState(Number(gameId), Number(playerId));
       //Implement gamestate fetch function.
       console.log("THe user has refreshed the page.");
     }
@@ -157,59 +173,16 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     isYourTurn,
     infoMessage,
     gameStartOrEndData,
-    opponenstShotsAtYourBoard,
+    opponentsShotsAtYourBoard,
     shotsAtOpponent,
   ]);
 
   useEffect(() => {
     console.log(
       "Shots updated:",
-      opponenstShotsAtYourBoard.filter((shot) => shot !== null)
+      opponentsShotsAtYourBoard.filter((shot) => shot !== null)
     );
-  }, [opponenstShotsAtYourBoard]);
-
-  useEffect(() => {}, [connected, gameId]);
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    let { direction, id, height, width } = active.data.current;
-    let draggedShip = ships.find((ship) => ship.id === id);
-
-    if (!draggedShip) return;
-
-    let { row, col } = getShipStartingCellCoords(
-      direction,
-      over.id,
-      height,
-      width
-    );
-
-    if (draggedShip) {
-      let coordinates = getShipCoords(direction, col, row, height, width);
-      let placedShipsCoords = placedShips.map((ship) => ship.coordinates);
-
-      let doesCollide = doesShipCollideWithPlacedShips(
-        coordinates,
-        placedShipsCoords
-      );
-
-      if (row + height <= 10 && col + width <= 10 && !doesCollide) {
-        const newShip = {
-          ...draggedShip,
-          height,
-          width,
-          coordinates,
-        };
-        setPlacedShips((prev) => [...prev, newShip]);
-        setShips((prev) => prev.filter((ship) => ship.id !== active.id));
-      } else {
-        console.log("The ship doesnt fit!");
-      }
-    }
-  };
+  }, [opponentsShotsAtYourBoard]);
 
   const resetShips = () => {
     if (shipsPlaced) {
@@ -269,35 +242,6 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     return true;
   };
 
-  const shootAtEnemyCell = async (x: number, y: number) => {
-    const newMove: Move = {
-      x: x,
-      y: y,
-      playerBehindTheMoveId: Number(playerId),
-      isHit: false,
-    };
-
-    try {
-      let validatedMove = await makeMove(
-        Number(gameId),
-        Number(playerId),
-        newMove
-      );
-      if (validatedMove) {
-        updateShotsAtOpponents(validatedMove);
-      }
-      console.log("THe response of the move is:", validatedMove);
-    } catch (error) {
-      setTimeout(
-        () =>
-          setInfoMessage(
-            "An error occured while shooting at the opponent. Please try again"
-          ),
-        6000
-      );
-    }
-  };
-
   let updateShotsAtOpponents = (move: Move) => {
     const updatedShots = [...shotsAtOpponent];
     updatedShots[move.y * 10 + move.x] = move;
@@ -317,25 +261,20 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
         </p>
         <p className="flex-[1_1_0%] text-xl">{shotMessage}</p>
       </header>
-      <div className="flex  flex-row justify-around align-middle">
-        <DndContext
-          onDragEnd={handleDragEnd}
-          collisionDetection={closestCorners}
-        >
-          <Ships ships={ships} />
-          <Grid
-            label="Your board"
-            placedShips={placedShips}
-            opponentsShotsAtYourBoard={opponenstShotsAtYourBoard}
-          />
-          <OpponentsGrid
-            label="Opponents board"
-            isYourTurn={isYourTurn}
-            shootAtEnemyCell={shootAtEnemyCell}
-            shotsAtOpponent={shotsAtOpponent}
-          />
-        </DndContext>
-      </div>
+
+      <GameArea
+        ships={ships}
+        placedShips={placedShips}
+        setPlacedShips={setPlacedShips}
+        shotsAtOpponent={shotsAtOpponent}
+        setShotsAtOpponent={setShotsAtOpponent}
+        playerId={playerId}
+        gameId={gameId}
+        setInfoMessage={setInfoMessage}
+        setShips={setShips}
+        opponentsShotsAtYourBoard={opponentsShotsAtYourBoard}
+        isYourTurn={isYourTurn}
+      />
       <footer className="w-full h-1/6 flex justify-around text-center">
         <div className="flex-[1_1_0%] flex justify-around items-center text-xl gap-8">
           <GameBoardButton
@@ -361,4 +300,4 @@ const GameBoard = ({ gameId, playerId }: GameBoardProps) => {
     </div>
   );
 };
-export default GameBoard;
+export default Game;

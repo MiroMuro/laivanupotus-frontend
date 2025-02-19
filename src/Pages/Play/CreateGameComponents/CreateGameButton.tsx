@@ -12,7 +12,7 @@ const CreateGameButton = (props: CreateGameButtonProps) => {
       >
         <h1>
           {creatingGameLoading ? (
-            <div text-xl className="loading-dots">
+            <div className="loading-dots">
               Creating game
               <span></span>
               <span></span>

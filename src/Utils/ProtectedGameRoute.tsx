@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./Authprovider";
 import { useParams } from "react-router";
-import GameBoard from "../Pages/GameBoard";
+import Game from "../Pages/Game";
 const ProtectedGameRoute = () => {
   const { token } = useAuth();
   const { gameId, playerId } = useParams();
@@ -39,7 +39,7 @@ const ProtectedGameRoute = () => {
   }, [gameId]);
 
   return isAuthorized ? (
-    <GameBoard gameId={gameId!} playerId={playerId!} />
+    <Game gameId={gameId!} playerId={playerId!} />
   ) : (
     <NotAuthenticated />
   );

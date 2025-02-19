@@ -69,9 +69,9 @@ const useGame = () => {
         }/api/game/create?userId=${playerId}`,
         {
           method: "POST",
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           signal: abortController.signal,
         }
       );
@@ -244,16 +244,15 @@ const useGame = () => {
     }
   };
 
-  const getGameState = async (
+  const getGameStateByUserIdAndMatchId = async (
     matchId: number,
-    playerId: number,
-    gameStatus: GameStatus
+    playerId: number
   ) => {
     try {
       const response = await fetch(
         `${
           import.meta.env.VITE_BACKEND_BASE_URL
-        }/api/game/${matchId}/gamestate?userId=${playerId}&gameStatus=${gameStatus}`,
+        }/api/game/${matchId}/gamestate?userId=${playerId}`,
         {
           method: "GET",
 
@@ -291,7 +290,7 @@ const useGame = () => {
     joiningGameLoading,
     placeShips,
     makeMove,
-    getGameState,
+    getGameStateByUserIdAndMatchId,
   };
 };
 export default useGame;
