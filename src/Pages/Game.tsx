@@ -1,10 +1,7 @@
-import Grid from "../Components/Grid/Grid";
-import OpponentsGrid from "../Components/Grid/OpponentsGrid";
 import ConnectionStatusNotification from "../Components/Grid/ConnectionStatusNotification";
 import OpponentConnectionStatusNotification from "../Components/Grid/OpponentConnectionStatusNotification";
-import Ships from "../Components/Grid/Ships";
-import useShip from "../Utils/UseShip";
-import { closestCorners, DndContext } from "@dnd-kit/core";
+
+import GameFooterArea from "../Components/GameFooterArea";
 import GameArea from "../Components/GameArea";
 import {
   Ship,
@@ -14,10 +11,7 @@ import {
   Move,
   WebSocketMoveResponseDto,
   ConnectionEvent,
-  GameStatus,
-  ConnectionStatus,
 } from "../Types/interfaces";
-import GameBoardButton from "../Components/Grid/GameBoardButton";
 import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
 import { useWebSocket } from "../Utils/WebSocketProvider";
@@ -31,22 +25,18 @@ interface GameBoardProps {
 const Game = ({ gameId, playerId }: GameBoardProps) => {
   const userHasRefreshedPage = useRef(false);
   const context = useWebSocket();
-  //Only used by Game.
+
   const { disconnect, subscribeToGameEvent, connected, connect } = context;
-  const { placeShips, getGameStateByUserIdAndMatchId } = useGame();
-  //Used by footer and GameArea
+  const { getGameStateByUserIdAndMatchId } = useGame();
+
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
   const [gameStatePlaceholder, setGameStatePlaceholder] = useState();
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
   );
-  //Can probabaly be moved to GameArea.
-
-  //This stays.
   const [opponentsShotsAtYourBoard, setOpponentShotsAtYourBoard] = useState<
     Move[]
   >(Array(100).fill(null));
-  const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
   const [infoMessage, setInfoMessage] = useState<string>(
     `Drag your all of your ships to your board, and then press "Confirm ships"`
   );
@@ -80,20 +70,18 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
       };
 
       const handleMove = (data: WebSocketMoveResponseDto) => {
-        const isCurrentPlayerTurn =
+        const isNotCurrentPlayerTurn =
           data.move.playerBehindTheMoveId !== Number(playerId);
 
-        if (isCurrentPlayerTurn) {
+        if (isNotCurrentPlayerTurn) {
           updateShotsAtYourBoard(data.move);
         } else {
           setShotMessage(data.message);
         }
-        setIsYourTurn(isCurrentPlayerTurn);
+        setIsYourTurn(isNotCurrentPlayerTurn);
       };
 
       const handleConnectionEvent = (data: ConnectionEvent) => {
-        console.log("In connection EVENT");
-        console.log("Connection event data: ", data);
         setOpponentConnectionMessage(data);
       };
       const gameSub = subscribeToGameEvent(
@@ -131,9 +119,10 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
         throw new Error("Failed to get game state");
       }
     };
+
     if (userHasRefreshedPage.current) {
       fetchGameState(Number(gameId), Number(playerId));
-      //Implement gamestate fetch function.
+
       console.log("THe user has refreshed the page.");
     }
     if (!userHasRefreshedPage.current) {
@@ -184,70 +173,6 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
     );
   }, [opponentsShotsAtYourBoard]);
 
-  const resetShips = () => {
-    if (shipsPlaced) {
-      let prevInfoMessage = infoMessage;
-      setInfoMessage("You can't reset ships after placing them");
-      setTimeout(() => setInfoMessage(prevInfoMessage), 6000);
-      return;
-    }
-    setPlacedShips([]);
-    setShips(initialShipsStateArray);
-  };
-
-  const confirmShips = async () => {
-    if (!shipsVerified()) {
-      return;
-    }
-
-    let shipsWithLongId: DraggableShip[] = placedShips.map((ship) => ({
-      ...ship,
-      id: ship.id.slice(-1),
-    }));
-    let success = await placeShips(
-      Number(gameId),
-      Number(playerId),
-      shipsWithLongId
-    );
-
-    if (success) {
-      setShipsPlaced(true);
-      setInfoMessage(
-        "Ships placed succesfully. Waiting for opponent to place ships"
-      );
-    } else {
-      setInfoMessage("Error placing ships. Try again");
-    }
-  };
-
-  const shipsVerified = () => {
-    return verifyAllShipsPlaced() && verifyShipsNotAlreadyPlaced();
-  };
-
-  const verifyAllShipsPlaced = () => {
-    if (placedShips.length !== initialShipsStateArray.length) {
-      console.log("Placed ships length:", placedShips.length);
-      console.log("Initial ships length:", initialShipsStateArray.length);
-      setInfoMessage("Place all ships before confirming");
-      return false;
-    }
-    return true;
-  };
-
-  const verifyShipsNotAlreadyPlaced = () => {
-    if (shipsPlaced) {
-      setInfoMessage("Ships already placed");
-      return false;
-    }
-    return true;
-  };
-
-  let updateShotsAtOpponents = (move: Move) => {
-    const updatedShots = [...shotsAtOpponent];
-    updatedShots[move.y * 10 + move.x] = move;
-    setShotsAtOpponent(updatedShots);
-  };
-
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">
       <ConnectionStatusNotification />
@@ -275,28 +200,16 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
         opponentsShotsAtYourBoard={opponentsShotsAtYourBoard}
         isYourTurn={isYourTurn}
       />
-      <footer className="w-full h-1/6 flex justify-around text-center">
-        <div className="flex-[1_1_0%] flex justify-around items-center text-xl gap-8">
-          <GameBoardButton
-            shipsPlaced={shipsPlaced}
-            label="Reset ships"
-            onButtonClick={resetShips}
-          />
-          <GameBoardButton
-            shipsPlaced={shipsPlaced}
-            label="Confirm ships"
-            onButtonClick={confirmShips}
-          />
-          <GameBoardButton
-            shipsPlaced={false}
-            label="Connect to chat"
-            onButtonClick={() => {
-              console.log("Chat opened");
-            }}
-          />
-        </div>
-        <div className="flex-[2_1_0%] flex bg-white justify-center items-center text-xl gap-8"></div>
-      </footer>
+      <GameFooterArea
+        placedShips={placedShips}
+        setPlacedShips={setPlacedShips}
+        infoMessage={infoMessage}
+        setInfoMessage={setInfoMessage}
+        setShips={setShips}
+        gameId={gameId}
+        playerId={playerId}
+        initialShipsStateArray={initialShipsStateArray}
+      />
     </div>
   );
 };
