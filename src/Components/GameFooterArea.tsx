@@ -1,11 +1,10 @@
 import { DraggableShip, Ship } from "../Types/interfaces";
-import GameBoardButton from "./Grid/GameBoardButton";
+import GameBoardButton from "./GameAreaComponents/GameBoardButton";
 import useGame from "../Utils/useGame";
 import { useState } from "react";
 interface gameFooterAreaProps {
   placedShips: DraggableShip[];
   setPlacedShips: React.Dispatch<React.SetStateAction<DraggableShip[]>>;
-
   gameId: string;
   playerId: string;
   setInfoMessage: React.Dispatch<React.SetStateAction<string>>;
@@ -26,9 +25,11 @@ const GameFooterArea = (props: gameFooterAreaProps) => {
     initialShipsStateArray,
     infoMessage,
   } = props;
+
   const [shipsPlaced, setShipsPlaced] = useState<boolean>(false);
 
   const { placeShips } = useGame();
+
   const confirmShips = async () => {
     if (!shipsVerified()) {
       return;

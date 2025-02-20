@@ -199,6 +199,7 @@ export interface ConnectionEvent {
   playerId: number;
   status: ConnectionStatus;
   message: string;
+  matchId: number;
 }
 
 export interface ErrorResponse {

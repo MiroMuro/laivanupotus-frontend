@@ -6,17 +6,13 @@ import { Client, StompSubscription } from "@stomp/stompjs";
 import { SubscriptionType, SubscriptionCallback } from "../Types/interfaces";
 
 interface WebSocketContextType extends WebSocketHook {
-  connect: (gameId: number) => void;
+  connect: (gameId: string) => void;
   disconnect: (gameId: number, permanent: boolean) => void;
   disconnectFromCreateGame: (permanent: boolean) => void;
   disconnectFromUnload: (gameId: number, permanent: boolean) => void;
   sendPageRefreshMessageThroughWebSocket: (gameId: number) => void;
 }
 
-interface GameBoardProps {
-  gameId: string;
-  playerId: string;
-}
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export const WebSocketProvider = ({
@@ -40,17 +36,18 @@ export const WebSocketProvider = ({
   const isPermanentDisconnect = useRef<boolean>(false);
 
   const connect = useCallback(
-    async (gameId: number) => {
+    async (gameId: string) => {
       if (stompClient.current?.connected) {
         //console.log("Already connected to Stomp client");
         return;
       }
-
       const client = new Client({
         brokerURL: `${import.meta.env.VITE_BACKEND_BASE_URL}/ws-battleship`,
+
         connectHeaders: {
           Authorization: `Bearer ${token}`,
         },
+
         debug: (str) => {
           console.log(str);
         },
@@ -61,17 +58,7 @@ export const WebSocketProvider = ({
 
       client.onConnect = () => {
         setConnected(true);
-        //console.log("Connected to websocket");
-        //console.log("Current user information", currentUserInformation);
-        stompClient.current?.publish({
-          destination: `/topic/game/${gameId}/opponent-connected`,
-          body: JSON.stringify({
-            message: "Opponent connected",
-            type: "CONNECTED",
-            timestamp: new Date().getTime(),
-            path: "/play",
-          }),
-        });
+        console.log("The client in question is", client);
       };
 
       client.onStompError = (frame) => {
@@ -154,16 +141,6 @@ export const WebSocketProvider = ({
     });
   };
 
-  const sendPageRefreshMessageThroughWebSocket = (gameId: number) => {
-    stompClient.current?.publish({
-      destination: `/topic/game/${gameId}/opponent-disconnected`,
-      body: JSON.stringify({
-        message: "Opponent intends to reconnect",
-        type: "REFRESH_INTENT",
-        timestamp: new Date().getTime(),
-      }),
-    });
-  };
   const unsubscribeStompClientFromAllEvents = () => {
     if (stompClient.current) {
       Object.keys(subscriptions.current).forEach((gameId) => {
@@ -190,7 +167,7 @@ export const WebSocketProvider = ({
       playerJoined: `/topic/game/${gameId}/player-joined`,
       opponentDisconnected: `/topic/game/${gameId}/opponent-disconnected`,
       move: `/topic/game/${gameId}/move`,
-      connectionEvent: `/topic/game/connections`,
+      connectionEvent: `/topic/game/${gameId}/connections`,
     };
 
     const subscription = stompClient.current.subscribe(
@@ -251,7 +228,6 @@ export const WebSocketProvider = ({
         disconnect,
         disconnectFromCreateGame,
         disconnectFromUnload,
-        sendPageRefreshMessageThroughWebSocket,
       }}
     >
       {children}

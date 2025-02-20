@@ -1,7 +1,7 @@
 import { DndContext, closestCorners } from "@dnd-kit/core";
-import Grid from "./Grid/Grid";
-import OpponentsGrid from "./Grid/OpponentsGrid";
-import Ships from "./Grid/Ships";
+import Grid from "./GameAreaComponents/Grid";
+import OpponentsGrid from "./GameAreaComponents/OpponentsGrid";
+import Ships from "./GameAreaComponents/Ships";
 import useShip from "../Utils/UseShip";
 import { DraggableShip, Move, Ship } from "../Types/interfaces";
 import { useState } from "react";

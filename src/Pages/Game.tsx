@@ -1,5 +1,5 @@
-import ConnectionStatusNotification from "../Components/Grid/ConnectionStatusNotification";
-import OpponentConnectionStatusNotification from "../Components/Grid/OpponentConnectionStatusNotification";
+import ConnectionStatusNotification from "../Components/GameAreaComponents/ConnectionStatusNotification";
+import OpponentConnectionStatusNotification from "../Components/GameAreaComponents/OpponentConnectionStatusNotification";
 
 import GameFooterArea from "../Components/GameFooterArea";
 import GameArea from "../Components/GameArea";
@@ -46,7 +46,6 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
   const [shotMessage, setShotMessage] = useState<string>("");
   const [gameStartOrEndData, setGameStartOrEndData] =
     useState<GameStartOrEnd | null>(null);
-  //Footer and GameArea both use this
   const [ships, setShips] = useState<Ship[]>(initialShipsStateArray);
 
   useEffect(() => {
@@ -103,7 +102,7 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
     };
 
     if (!connected) {
-      connect(Number(gameId));
+      connect(gameId);
     } else {
       setupSubscriptions();
     }
