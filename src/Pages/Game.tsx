@@ -11,6 +11,7 @@ import {
   Move,
   WebSocketMoveResponseDto,
   ConnectionEvent,
+  MatchStatusResponseDto,
 } from "../Types/interfaces";
 import { useEffect, useState } from "react";
 import initialShipsStateArray from "../Utils/InitialShipsState";
@@ -30,7 +31,8 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
   const { getGameStateByUserIdAndMatchId } = useGame();
 
   const [placedShips, setPlacedShips] = useState<DraggableShip[]>([]);
-  const [gameStatePlaceholder, setGameStatePlaceholder] = useState();
+  const [gameStatePlaceholder, setGameStatePlaceholder] =
+    useState<MatchStatusResponseDto>();
   const [shotsAtOpponent, setShotsAtOpponent] = useState<Move[]>(
     Array(100).fill(null)
   );
@@ -112,7 +114,9 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
           matchId,
           playerId
         );
-        setGameStatePlaceholder(gameState);
+        if (gameState) {
+          setGameStateData(gameState);
+        }
       } catch (error) {
         console.error("Failed to get game state:", error);
         throw new Error("Failed to get game state");
@@ -171,6 +175,39 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
       opponentsShotsAtYourBoard.filter((shot) => shot !== null)
     );
   }, [opponentsShotsAtYourBoard]);
+
+  const setGameStateData = (data: MatchStatusResponseDto) => {
+    //Three states. PLACING SHIPS, user has not placed ships. PLACING SHIPS, user has placed ships. IN_PROGRESS, game has started.
+    //IN_PROGRESS, game has started.
+    console.log("The data in setGameStateData is:", data);
+    let player: "player1" | "player2" =
+      data.player1.id === Number(playerId) ? "player1" : "player2";
+    let playerBoard: "player1Board" | "player2Board" =
+      data.player1.id === Number(playerId) ? "player1Board" : "player2Board";
+
+    handlePlacingShipsPhase(data, player, playerBoard);
+    // handleGameInProgressPhase(data, player, playerBoard);
+  };
+  const handlePlacingShipsPhase = (
+    data: MatchStatusResponseDto,
+    player: "player1" | "player2",
+    playerBoard: "player1Board" | "player2Board"
+  ) => {
+    if (data.status === matchStatus.PLACING_SHIPS) {
+      if (data[playerBoard].ships && data[playerBoard].ships.length > 0) {
+        setShips([]);
+        setPlacedShips(data[playerBoard].ships);
+        setInfoMessage(
+          "Ships placed succesfully. Waiting for opponent to place ships"
+        );
+        // Add your logic here
+      } else {
+        setInfoMessage(
+          "Drag your all of your ships to your board, and then press 'Confirm ships'"
+        );
+      }
+    }
+  };
 
   return (
     <div className="bg-battleship-blue-light h-5/6 py-4 my-6 w-5/6 border-4 border-gray-400 rounded-xl text-white flex flex-col justify-between">

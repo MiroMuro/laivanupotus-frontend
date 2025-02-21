@@ -208,3 +208,19 @@ export interface ErrorResponse {
   status: number;
   timestamp: string;
 }
+
+type MatchStatusBoardResponseDto = {
+  id: number;
+  ships: DraggableShip[] | null;
+  moves: Move[];
+};
+
+export interface MatchStatusResponseDto {
+  id: number;
+  player1: IngameUserProfileDto;
+  player2: IngameUserProfileDto;
+  player1Board: MatchStatusBoardResponseDto;
+  player2Board: MatchStatusBoardResponseDto;
+  status: matchStatus;
+  currentTurnPlayerId: number | null;
+}

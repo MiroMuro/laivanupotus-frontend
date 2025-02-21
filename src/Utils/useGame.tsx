@@ -6,6 +6,7 @@ import {
   DraggableShip,
   Move,
   GameStatus,
+  MatchStatusResponseDto,
 } from "../Types/interfaces";
 import { GameDto } from "../Types/interfaces";
 const useGame = () => {
@@ -267,7 +268,7 @@ const useGame = () => {
         throw new Error("Failed to get game state! Status: " + response.status);
       }
 
-      let gameState = await response.json();
+      let gameState: MatchStatusResponseDto = await response.json();
       return gameState;
     } catch (error: unknown) {
       if (error instanceof Error) {
