@@ -184,8 +184,15 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
       data.player1.id === Number(playerId) ? "player1" : "player2";
     let playerBoard: "player1Board" | "player2Board" =
       data.player1.id === Number(playerId) ? "player1Board" : "player2Board";
-
-    handlePlacingShipsPhase(data, player, playerBoard);
+    let opponentBoard: "player1Board" | "player2Board" =
+      data.player1.id !== Number(playerId) ? "player1Board" : "player2Board";
+    if (data.status === matchStatus.PLACING_SHIPS) {
+      handlePlacingShipsPhase(data, player, playerBoard);
+    }
+    if (data.status === matchStatus.IN_PROGRESS) {
+      handlegameInProgressPhase(data, player, playerBoard, opponentBoard);
+    }
+    // handlePlacingShipsPhase(data, player, playerBoard);
     // handleGameInProgressPhase(data, player, playerBoard);
   };
   const handlePlacingShipsPhase = (
@@ -207,6 +214,52 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
         );
       }
     }
+  };
+
+  const handlegameInProgressPhase = (
+    data: MatchStatusResponseDto,
+    player: "player1" | "player2",
+    playerBoard: "player1Board" | "player2Board",
+    opponentBoard: "player1Board" | "player2Board"
+  ) => {
+    if (data.status === matchStatus.IN_PROGRESS) {
+      setGameStartOrEndData({
+        player: data[player],
+        status: data.status,
+      });
+      setInfoMessage("Game started!");
+      if (data[playerBoard].ships) {
+        setPlacedShips(data[playerBoard].ships);
+        setShips([]);
+      }
+      if (data[playerBoard].moves) {
+        placeMovesOnOpponentsBoard(data[playerBoard].moves);
+      }
+      if (data[opponentBoard].moves) {
+        placeShotsOnPlayerBoard(data[opponentBoard].moves);
+      }
+      if (data.currentTurnPlayerId === Number(playerId)) {
+        setIsYourTurn(true);
+      }
+    }
+  };
+
+  const placeMovesOnOpponentsBoard = (moves: Move[]) => {
+    moves.forEach((move) => {
+      let index = move.y * 10 + move.x;
+      let newShots = [...shotsAtOpponent];
+      newShots[index] = move;
+      setShotsAtOpponent(newShots);
+    });
+  };
+
+  const placeShotsOnPlayerBoard = (moves: Move[]) => {
+    moves.forEach((move) => {
+      let index = move.y * 10 + move.x;
+      let newShots = [...opponentsShotsAtYourBoard];
+      newShots[index] = move;
+      setOpponentShotsAtYourBoard(newShots);
+    });
   };
 
   return (
