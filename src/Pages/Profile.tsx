@@ -131,24 +131,7 @@ const Profile = () => {
         </table>
       </div>
 
-      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6">
-        {/*<img
-          src={padlock}
-          className="border-2 h-12 w-12 bg-white border-white rounded-xl text-center mx-2 object-cover"
-          alt="https://www.flaticon.com/free-icons/logout Logout icons created by Pixel perfect"
-          title="logout icons"
-        />
-        <div className="flex flex-row justify-evenly w-full h-full py-2">
-          <div className="flex-1 flex flex-col h-full  bg-battleship-blue-light justify-end my-auto border-2 rounded-xl   border-gray-400  shadow-xl transition transformation ease-in-out 200ms active:scale-75 hover:scale-105">
-            <button
-              className="h-3/4 w-full bg-battleship-blue rounded-xl p-1 relative text-3xl"
-              onClick={() => setModal(true)}
-            >
-              Change password
-            </button>
-          </div>
-        </div>*/}
-      </div>
+      <div className="flex flex-1 w-full max-h-20  flex-row justify-between items-center px-6"></div>
       {modal && (
         <EditProfileDialog
           openModal={modal}

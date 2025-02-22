@@ -1,6 +1,6 @@
 import ConnectionStatusNotification from "../Components/GameAreaComponents/ConnectionStatusNotification";
 import OpponentConnectionStatusNotification from "../Components/GameAreaComponents/OpponentConnectionStatusNotification";
-
+import VictoryDialog from "../Components/VictoryDialog";
 import GameFooterArea from "../Components/GameFooterArea";
 import GameArea from "../Components/GameArea";
 import {
@@ -24,6 +24,9 @@ interface GameBoardProps {
 }
 
 const Game = ({ gameId, playerId }: GameBoardProps) => {
+  const [victoryModal, setVictoryModal] = useState(false);
+  const [defeatModal, setDefeatModal] = useState(false);
+
   const userHasRefreshedPage = useRef(false);
   const context = useWebSocket();
 
@@ -179,64 +182,57 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
   const setGameStateData = (data: MatchStatusResponseDto) => {
     //Three states. PLACING SHIPS, user has not placed ships. PLACING SHIPS, user has placed ships. IN_PROGRESS, game has started.
     //IN_PROGRESS, game has started.
-    console.log("The data in setGameStateData is:", data);
-    let player: "player1" | "player2" =
-      data.player1.id === Number(playerId) ? "player1" : "player2";
-    let playerBoard: "player1Board" | "player2Board" =
-      data.player1.id === Number(playerId) ? "player1Board" : "player2Board";
-    let opponentBoard: "player1Board" | "player2Board" =
-      data.player1.id !== Number(playerId) ? "player1Board" : "player2Board";
-    if (data.status === matchStatus.PLACING_SHIPS) {
-      handlePlacingShipsPhase(data, player, playerBoard);
-    }
-    if (data.status === matchStatus.IN_PROGRESS) {
-      handlegameInProgressPhase(data, player, playerBoard, opponentBoard);
-    }
+    handleGameStateRefresh(data);
+    // if (data.status === matchStatus.PLACING_SHIPS) {
+    //   handlePlacingShipsPhase(data, player, playerBoard);
+    // }
+    // if (data.status === matchStatus.IN_PROGRESS) {
+    //   handlegameInProgressPhase(data, player, playerBoard, opponentBoard);
+    // }
     // handlePlacingShipsPhase(data, player, playerBoard);
     // handleGameInProgressPhase(data, player, playerBoard);
   };
-  const handlePlacingShipsPhase = (
-    data: MatchStatusResponseDto,
-    player: "player1" | "player2",
-    playerBoard: "player1Board" | "player2Board"
-  ) => {
+
+  const handleGameStateRefresh = (data: MatchStatusResponseDto) => {
     if (data.status === matchStatus.PLACING_SHIPS) {
-      if (data[playerBoard].ships && data[playerBoard].ships.length > 0) {
-        setShips([]);
-        setPlacedShips(data[playerBoard].ships);
-        setInfoMessage(
-          "Ships placed succesfully. Waiting for opponent to place ships"
-        );
-        // Add your logic here
-      } else {
-        setInfoMessage(
-          "Drag your all of your ships to your board, and then press 'Confirm ships'"
-        );
-      }
+      handlePlacingShipsPhase(data);
+    }
+    if (data.status === matchStatus.IN_PROGRESS) {
+      handlegameInProgressPhase(data);
     }
   };
 
-  const handlegameInProgressPhase = (
-    data: MatchStatusResponseDto,
-    player: "player1" | "player2",
-    playerBoard: "player1Board" | "player2Board",
-    opponentBoard: "player1Board" | "player2Board"
-  ) => {
+  const handlePlacingShipsPhase = (data: MatchStatusResponseDto) => {
+    if (data.playerBoard.ships && data.playerBoard.ships.length > 0) {
+      setShips([]);
+      setPlacedShips(data.playerBoard.ships);
+      setInfoMessage(
+        "Ships placed succesfully. Waiting for opponent to place ships"
+      );
+      // Add your logic here
+    } else {
+      setInfoMessage(
+        `"Drag your all of your ships to your board, and then press "Confirm ships"`
+      );
+    }
+  };
+
+  const handlegameInProgressPhase = (data: MatchStatusResponseDto) => {
     if (data.status === matchStatus.IN_PROGRESS) {
       setGameStartOrEndData({
-        player: data[player],
+        player: data.player,
         status: data.status,
       });
       setInfoMessage("Game started!");
-      if (data[playerBoard].ships) {
-        setPlacedShips(data[playerBoard].ships);
+      if (data.playerBoard.ships) {
+        setPlacedShips(data.playerBoard.ships);
         setShips([]);
       }
-      if (data[playerBoard].moves) {
-        placeMovesOnOpponentsBoard(data[playerBoard].moves);
+      if (data.playerBoard.moves) {
+        placeMovesOnOpponentsBoard(data.playerBoard.moves);
       }
-      if (data[opponentBoard].moves) {
-        placeShotsOnPlayerBoard(data[opponentBoard].moves);
+      if (data.opponentBoard.moves) {
+        placeShotsOnPlayerBoard(data.opponentBoard.moves);
       }
       if (data.currentTurnPlayerId === Number(playerId)) {
         setIsYourTurn(true);
@@ -276,6 +272,10 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
         <p className="flex-[1_1_0%] text-xl">{shotMessage}</p>
       </header>
 
+      <VictoryDialog
+        openModal={victoryModal}
+        closeModal={() => setVictoryModal(false)}
+      />
       <GameArea
         ships={ships}
         placedShips={placedShips}

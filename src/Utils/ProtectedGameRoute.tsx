@@ -22,16 +22,36 @@ const ProtectedGameRoute = () => {
           }
         );
         response.json().then((data) => console.log(data));
-        console.log(isAuthorized);
 
         if (!response.ok) {
-          return <NotAuthenticated />;
+          const errorData = await response.json().catch(() => null);
+          switch (response.status) {
+            case 401:
+              throw new Error(
+                errorData?.message ||
+                  "You are not authorized to play this match!"
+              );
+            case 500:
+              throw new Error(
+                errorData?.message ||
+                  "Internal server error! Please try again later!"
+              );
+            default:
+              throw new Error(
+                errorData?.message ||
+                  `Failed to create game: ${response.statusText}`
+              );
+          }
         }
 
         setIsAuthorized(true);
       } catch (error) {
-        console.error(error);
-        <NotAuthenticated />;
+        if (error instanceof Error) {
+          throw new Error(error.message);
+        }
+        throw new Error(
+          "An unexpected error occurred! Please try again later!"
+        );
       }
     };
 

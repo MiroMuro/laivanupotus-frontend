@@ -217,10 +217,10 @@ type MatchStatusBoardResponseDto = {
 
 export interface MatchStatusResponseDto {
   id: number;
-  player1: IngameUserProfileDto;
-  player2: IngameUserProfileDto;
-  player1Board: MatchStatusBoardResponseDto;
-  player2Board: MatchStatusBoardResponseDto;
+  player: IngameUserProfileDto;
+  opponent: IngameUserProfileDto;
+  playerBoard: MatchStatusBoardResponseDto;
+  opponentBoard: MatchStatusBoardResponseDto;
   status: matchStatus;
   currentTurnPlayerId: number | null;
 }
