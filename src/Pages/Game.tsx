@@ -1,6 +1,7 @@
 import ConnectionStatusNotification from "../Components/GameAreaComponents/ConnectionStatusNotification";
 import OpponentConnectionStatusNotification from "../Components/GameAreaComponents/OpponentConnectionStatusNotification";
 import VictoryDialog from "../Components/VictoryDialog";
+import DefeatDialog from "../Components/DefeatDialog";
 import GameFooterArea from "../Components/GameFooterArea";
 import GameArea from "../Components/GameArea";
 import {
@@ -70,6 +71,11 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
 
         if (data.status === matchStatus.FINISHED) {
           setInfoMessage("Game finished!");
+          let playerWon = data.player.id === Number(playerId) ? true : false;
+          console.log("Player won:", playerWon);
+          playerWon ? setVictoryModal(true) : setDefeatModal(true);
+          console.log("Victory modal status:", victoryModal);
+          console.log("Defeat modal status:", defeatModal);
         }
       };
 
@@ -275,6 +281,10 @@ const Game = ({ gameId, playerId }: GameBoardProps) => {
       <VictoryDialog
         openModal={victoryModal}
         closeModal={() => setVictoryModal(false)}
+      />
+      <DefeatDialog
+        openModal={defeatModal}
+        closeModal={() => setDefeatModal(false)}
       />
       <GameArea
         ships={ships}

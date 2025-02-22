@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { EditProfileDialogProps } from "../Types/interfaces";
+import { useNavigate } from "react-router-dom";
 
 const VictoryDialog = ({ openModal, closeModal }: EditProfileDialogProps) => {
   const ref = useRef<HTMLDialogElement>(null);
@@ -11,7 +12,7 @@ const VictoryDialog = ({ openModal, closeModal }: EditProfileDialogProps) => {
       ref.current?.close();
     }
   }, [openModal]);
-
+  const navigate = useNavigate();
   return (
     <>
       {openModal && (
@@ -45,7 +46,7 @@ const VictoryDialog = ({ openModal, closeModal }: EditProfileDialogProps) => {
               <button
                 className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative cursor-pointer
         `}
-                onClick={() => console.log("clicked home again")}
+                onClick={() => () => navigate("/")}
               >
                 <p className="text-2xl text-white absolute -top-3 left-1/2 -translate-x-1/2">
                   Home
