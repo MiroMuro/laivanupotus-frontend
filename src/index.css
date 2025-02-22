@@ -71,6 +71,10 @@
   transform: translateX(-150%);
 }
 
+.slide-down {
+  animation: slideInFromTop 1.5s ease-in-out forwards;
+}
+
 .slide-in {
   animation: slideInFromLeft 1s ease-in-out forwards;
 }
@@ -97,6 +101,14 @@
   }
 }
 
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-150%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

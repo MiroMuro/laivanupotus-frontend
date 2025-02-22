@@ -12,13 +12,17 @@ const DefeatDialog = ({ openModal, closeModal }: EditProfileDialogProps) => {
     }
   }, [openModal]);
   const navigate = useNavigate();
+  const closeDialogAndNavigateHome = () => {
+    closeModal();
+    navigate("/");
+  };
   return (
     <>
       {openModal && (
         <dialog
           ref={ref}
           onCancel={closeModal}
-          className="h-1/2 w-1/3 rounded-md border-4 text-white flex flex-col justify-start items-center bg-battleship-blue-light border-gray-400 backdrop:backdrop-blur"
+          className="slide-down h-1/2 w-1/3 rounded-md border-4 text-white flex flex-col justify-start items-center bg-battleship-blue-light border-gray-400 backdrop:backdrop-blur"
         >
           <h1 className="text-4xl">You lost!</h1>
           <div className="flex flex-1 flex-row w-full h-full text-xl justify-around items-center px-6">
@@ -45,7 +49,7 @@ const DefeatDialog = ({ openModal, closeModal }: EditProfileDialogProps) => {
               <button
                 className={`w-full rounded-xl  h-3/4  bg-battleship-blue p-1 relative cursor-pointer
         `}
-                onClick={() => navigate("/")}
+                onClick={() => closeDialogAndNavigateHome()}
               >
                 <p className="text-2xl text-white absolute -top-3 left-1/2 -translate-x-1/2">
                   Home

@@ -25,7 +25,7 @@ interface GameBoardProps {
 }
 
 const Game = ({ gameId, playerId }: GameBoardProps) => {
-  const [victoryModal, setVictoryModal] = useState(false);
+  const [victoryModal, setVictoryModal] = useState(true);
   const [defeatModal, setDefeatModal] = useState(false);
 
   const userHasRefreshedPage = useRef(false);
